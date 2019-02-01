@@ -1,142 +1,214 @@
 \documentclass{beamer}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric}
 
 \title{Unification}
 \author{Isaac Elliott}
 
 \begin{document}
 
+\tikzset {
+  pics/triangle/.style n args={5}{
+    code = {
+      \node[
+        align=center,
+        shape=isosceles triangle,
+        draw=black,
+        isosceles triangle apex angle=60,
+        shape border rotate=90,
+        minimum width=#2,
+        fill=#4,
+        anchor=base,
+        text depth=1em
+      ] (#1) at (#3) { #5 };
+    }
+  }
+}
+
+\definecolor{red}{RGB}{215,16,0}
+\definecolor{blue}{RGB}{0,132,255}
+\definecolor{green}{RGB}{0,230,44}
+
 \frame{\titlepage}
 
 \begin{frame}
-  \frametitle{Solve these equations}
 
-  $$ x = 6 - z $$
-  $$ y + 5 = 12 - x $$
-  $$ z + y = 5 $$
+  \centering
 
-\end{frame}
-
-\begin{frame}
-  \frametitle{Solve these equations}
-
-  $$ x = 6 - z $$
-  $$ y + 5 = 12 - (6 - z) $$
-  $$ z + y = 5 $$
+  \begin{tikzpicture}
+    \pic{ triangle={t1}{1.5cm}{-1.5,0}{blue}{} };
+    \node (equals) at (0, 0) {$ = $};
+    \pic{ triangle={t2}{1.5cm}{1.5,0}{blue}{} };
+  \end{tikzpicture}
 
 \end{frame}
 
 \begin{frame}
-  \frametitle{Solve these equations}
 
-  $$ x = 6 - z $$
-  $$ y + 5 = 6 + z $$
-  $$ z + y = 5 $$
+  \centering
 
-\end{frame}
-
-\begin{frame}
-  \frametitle{Solve these equations}
-
-  $$ x = 6 - z $$
-  $$ y = 1 + z $$
-  $$ z + y = 5 $$
+  \begin{tikzpicture}
+    \pic{ triangle={t1}{1.5cm}{-1.5,0}{green}{} };
+    \node (equals) at (0, 0) {$ = $};
+    \pic{ triangle={t2}{1.5cm}{1.5,0}{green}{} };
+  \end{tikzpicture}
 
 \end{frame}
 
 \begin{frame}
-  \frametitle{Solve these equations}
 
-  $$ x = 6 - z $$
-  $$ y = 1 + z $$
-  $$ z + (1 + z) = 5 $$
+  \centering
 
-\end{frame}
-
-\begin{frame}
-  \frametitle{Solve these equations}
-
-  $$ x = 6 - z $$
-  $$ y = 1 + z $$
-  $$ z = 2 $$
+  \begin{tikzpicture}
+    \pic{ triangle={t1}{1.5cm}{-1.5,0}{red}{} };
+    \node (equals) at (0, 0) {$ \neq $};
+    \pic{ triangle={t2}{1.5cm}{1.5,0}{blue}{} };
+  \end{tikzpicture}
 
 \end{frame}
 
 \begin{frame}
-  \frametitle{Solve these equations}
 
-  $$ x = 6 - 2 $$
-  $$ y = 1 + 2 $$
-  $$ z = 2 $$
+  \centering
 
-\end{frame}
+  \begin{tikzpicture}
+    \pic{ triangle={outer1}{2cm}{-2,0}{green}{} };
+    \pic{ triangle={inner1}{1cm}{outer1.base}{blue}{} };
 
-\begin{frame}
-  \frametitle{Solve these equations}
+    \node (equals) at (0, 0) {$ = $};
 
-  $$ x = 4 $$
-  $$ y = 3 $$
-  $$ z = 2 $$
+    \pic{ triangle={outer2}{2cm}{2,0}{green}{} };
+    \pic{ triangle={inner2}{1cm}{outer2.base}{blue}{} };
+  \end{tikzpicture}
 
 \end{frame}
 
 \begin{frame}
-  \frametitle{Solve these equations, round 2}
 
-  $$ x = 2 + y $$
-  $$ 3 + y = 2 - z $$
-  $$ z + x = 4 $$
+  \centering
 
-\end{frame}
+  \begin{tikzpicture}
+    \pic{ triangle={outer1}{2cm}{-2,0}{green}{} };
+    \pic{ triangle={inner1}{1cm}{outer1.base}{blue}{} };
 
-\begin{frame}
-  \frametitle{Solve these equations, round 2}
+    \node (equals) at (0, 0) {$ \neq $};
 
-  $$ x = 2 + y $$
-  $$ 3 + y = 2 - z $$
-  $$ z + (2 + y) = 4 $$
+    \pic{ triangle={outer2}{2cm}{2,0}{green}{} };
+  \end{tikzpicture}
 
 \end{frame}
 
 \begin{frame}
-  \frametitle{Solve these equations, round 2}
 
-  $$ x = 2 + y $$
-  $$ y = -1 - z $$
-  $$ z + (2 + y) = 4 $$
+  \centering
 
-\end{frame}
+  \begin{tikzpicture}
+    \pic{ triangle={t1}{1.5cm}{-1.5,0}{white}{?0} };
 
-\begin{frame}
-  \frametitle{Solve these equations, round 2}
+    \node (equals) at (0, 0) {$ = $};
 
-  $$ x = 2 + (-1 - z) $$
-  $$ y = -1 - z $$
-  $$ z + (2 + (-1 - z) = 4 $$
+    \pic{ triangle={t2}{1.5cm}{1.5,0}{red}{\phantom{?0}} };
+  \end{tikzpicture}
 
 \end{frame}
 
 \begin{frame}
-  \frametitle{Solve these equations, round 2}
 
-  $$ x = 2 + (-1 - z) $$
-  $$ y = -1 - z $$
-  $$ z + (1 - z) = 4 $$
+  \centering
+
+  \begin{tikzpicture}
+    \pic{ triangle={t1}{1.5cm}{-1.5,0}{red}{\phantom{?0}} };
+
+    \node (equals) at (0, 0) {$ = $};
+
+    \pic{ triangle={t2}{1.5cm}{1.5,0}{red}{\phantom{?0}} };
+  \end{tikzpicture}
+
+  $$
+    \lbrace \;
+    ?0 \mapsto \tikz[baseline=-0.5ex]
+    \node[
+      shape=isosceles triangle,
+      isosceles triangle apex angle=60,
+      shape border rotate=90,
+      draw=black,
+      fill=red,
+      anchor=base
+    ] {};
+    \; \rbrace
+  $$
 
 \end{frame}
 
 \begin{frame}
-  \frametitle{Solve these equations, round 2}
 
-  $$ x = 2 + (-1 - z) $$
-  $$ y = -1 - z $$
-  $$ 1 = 4 $$
+  \centering
+
+  \begin{tikzpicture}
+    \pic{ triangle={outer1}{3cm}{-2,0}{blue}{} };
+    \pic{ triangle={inner1}{1cm}{outer1.center}{green}{\phantom{?0}} };
+
+    \node (equals) at (0, 0) {$ = $};
+
+    \pic{ triangle={outer2}{3cm}{2,0}{blue}{} };
+    \pic{ triangle={inner2}{1cm}{outer2.center}{white}{?0} };
+  \end{tikzpicture}
 
 \end{frame}
 
 \begin{frame}
-  \frametitle{Solve these equations, round 2}
 
-  Unsolvable!
+  \centering
+
+  \begin{tikzpicture}
+    \pic{ triangle={outer1}{3cm}{-2,0}{blue}{} };
+    \pic{ triangle={inner1}{1cm}{outer1.center}{green}{\phantom{?0}} };
+
+    \node (equals) at (0, 0) {$ = $};
+
+    \pic{ triangle={outer2}{3cm}{2,0}{blue}{} };
+    \pic{ triangle={inner2}{1cm}{outer2.center}{green}{\phantom{?0}} };
+  \end{tikzpicture}
+
+  $$
+    \lbrace \;
+    ?0 \mapsto \tikz[baseline=-0.5ex]
+    \node[
+      shape=isosceles triangle,
+      isosceles triangle apex angle=60,
+      shape border rotate=90,
+      draw=black,
+      fill=green,
+      anchor=base
+    ] {};
+    \; \rbrace
+  $$
+
+\end{frame}
+
+\begin{frame}
+
+  \begin{tikzpicture}
+    \node[
+      shape=isosceles triangle,
+      isosceles triangle apex angle=60,
+      shape border rotate=90,
+      draw=black,
+      minimum width=4cm,
+      fill=blue!20
+    ] (bigt) at (0, 0) {};
+
+    \node[
+      shape=isosceles triangle,
+      isosceles triangle apex angle=60,
+      shape border rotate=90,
+      minimum width=1.75cm,
+    ] (medt) at (bigt.base) {};
+
+    \pic{ triangle={t1}{1cm}{medt.apex}{white}{?0} };
+    \pic{ triangle={t2}{1cm}{medt.left corner}{white}{?1} };
+    \pic{ triangle={t3}{1cm}{medt.right corner}{white}{?2} };
+  \end{tikzpicture}
 
 \end{frame}
 
