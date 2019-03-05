@@ -1,214 +1,597 @@
 \documentclass{beamer}
-\usepackage{tikz}
-\usetikzlibrary{shapes.geometric}
+\usepackage{bcprules, textcomp, prftree, amsmath, tikz}
+\usepackage[safe]{tipa}
 
-\title{Unification}
+\newcommand{\ifte}[3]{\texttt{if} \; {#1} \; \texttt{then} \; {#2} \; \texttt{else} \; {#3}}
+\newcommand{\lamann}[3]{\lambda {#1} \texttt{:} {#2} \texttt{.} \; {#3}}
+\newcommand{\lam}[2]{\lambda {#1} \texttt{.} \; {#2}}
+\newcommand{\true}[0]{\texttt{true}}
+\newcommand{\false}[0]{\texttt{false}}
+\newcommand{\Bool}[0]{\texttt{Bool}}
+\newcommand{\bluebox}[1]{\tikz[baseline] \node[fill=blue!20,rectangle,anchor=text]{#1}; }
+\newcommand{\greenbox}[1]{\tikz[baseline] \node[fill=green!20,rectangle,anchor=text]{#1}; }
+\newcommand{\redbox}[1]{\tikz[baseline] \node[fill=red!20,rectangle,anchor=text]{#1}; }
+
+\defbeamertemplate{section page}{minimal}[1][]{
+  \begin{centering}{}
+    \vskip1em\par
+    \begin{beamercolorbox}[sep=12pt,center]{part title}
+      \usebeamerfont{section title}\insertsection\par
+    \end{beamercolorbox}
+  \end{centering}
+}
+
+\setbeamertemplate{section page}[minimal]
+\AtBeginSection{\frame{\sectionpage}}
+
+\title{Type Inference \& Unification}
 \author{Isaac Elliott}
 
 \begin{document}
 
-\tikzset {
-  pics/triangle/.style n args={5}{
-    code = {
-      \node[
-        align=center,
-        shape=isosceles triangle,
-        draw=black,
-        isosceles triangle apex angle=60,
-        shape border rotate=90,
-        minimum width=#2,
-        fill=#4,
-        anchor=base,
-        text depth=1em
-      ] (#1) at (#3) { #5 };
-    }
-  }
-}
-
-\definecolor{red}{RGB}{215,16,0}
-\definecolor{blue}{RGB}{0,132,255}
-\definecolor{green}{RGB}{0,230,44}
-
 \frame{\titlepage}
 
+\section{STLC}
+
+\begin{frame}
+  \frametitle{STLC}
+
+  % here's the presentation of our familiar simply-typed lambda calculus
+
+  \[
+  \begin{aligned}
+  Type ::= \\
+   ~ & Type \rightarrow Type \\
+   ~ & \Bool \\ \\
+  term ::= \\
+   ~ & var \\
+   ~ & \lamann{var}{Type}{term} \\
+   ~ & term \; term \\
+   ~ & \true \\
+   ~ & \false \\
+   ~ & \ifte{term}{term}{term}
+  \end{aligned}
+  \]
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{STLC}
+
+  % typing rules
+
+  \infrule[T-var]
+    {}
+    {\Gamma , \; x : T \vdash x : T}
+
+  \infrule[T-lam-ann]
+    {\Gamma , \; x : S \vdash e : T}
+    {\Gamma \vdash \lamann{x}{S}{e} \;\; : \;\; S \rightarrow T}
+
+  \infrule[T-app]
+    {\Gamma \vdash f : S \rightarrow T \andalso \Gamma \vdash x : S}
+    {\Gamma \vdash f \; x \;\; : \;\; T}
+
+  \infrule[T-true]
+    {}
+    {\Gamma \vdash \true : \Bool}
+
+  \infrule[T-false]
+    {}
+    {\Gamma \vdash \false : \Bool}
+
+  \infrule[T-if]
+    {\Gamma \vdash b : \Bool \andalso \Gamma \vdash x : T \andalso \Gamma \vdash y : T}
+    {\Gamma \vdash \ifte{b}{x}{y} \;\; : \;\; T}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{STLC}
+
+  %% what's the type of this expression?
+
+  \[
+  \lamann{\texttt{b}}{\Bool}{\ifte{\texttt{b}}{\false}{\true}}
+  \]
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{STLC}
+
+  %% what's the type of this expression?
+
+  \[
+  \Bool \rightarrow \Bool
+  \]
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{STLC}
+
+  %% but if I left off the annotation, would that change your answer?
+
+  \[
+  \lam{\texttt{b}}{\ifte{\texttt{b}}{\false}{\true}}
+  \]
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{STLC}
+
+  % one problem with STLC is that we have to add type annotations to every
+  % lambda, even if the type of the argument is *obvious* given how it's used
+  % in the body
+
+  \[
+  \lamann{\texttt{b}}{\Bool}{\ifte{\texttt{b}}{\false}{\true}}
+  \]
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{STLC}
+
+  % the syntax is straightforward
+
+  \[
+  \begin{aligned}
+  term ::= \\
+   ~ & \dots \\
+   ~ & \lam{var}{term}
+  \end{aligned}
+  \]
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{STLC}
+
+  % let's design a typing rule for it
+
+  \infrule[T-lam]
+    {\phantom{ \Gamma , \; x : \; ?? } \vdash \phantom{ e : T }}
+    {\Gamma \vdash \lam{x}{e} \;\; : \phantom{ \;\; ? \rightarrow T }}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{STLC}
+
+  \infrule[T-lam]
+    {\Gamma \phantom{, \; x : \; ?? } \vdash \phantom{ e : T }}
+    {\Gamma \vdash \lam{x}{e} \;\; : \phantom{ \;\; ? \rightarrow T }}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{STLC}
+
+  \infrule[T-lam]
+    {\Gamma , \; x \phantom{: \; ?? } \vdash \phantom{ e : T }}
+    {\Gamma \vdash \lam{x}{e} \;\; : \phantom{ \;\; ? \rightarrow T }}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{STLC}
+
+  \infrule[T-lam]
+    {\Gamma , \; x : \; ?? \vdash \phantom{ e : T }}
+    {\Gamma \vdash \lam{x}{e} \;\; : \phantom{ \;\; ? \rightarrow T }}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{STLC}
+
+  \infrule[T-lam]
+    {\Gamma , \; x : \; ?? \vdash e : T}
+    {\Gamma \vdash \lam{x}{e} \;\; : \phantom{ \;\; ? \rightarrow T }}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{STLC}
+
+  % Solving these kinds of problems is the essence of *type inference*
+  % There is an unknown type, and we need
+
+  \infrule[T-lam]
+    {\Gamma , \; x : \; ?? \vdash e : T}
+    {\Gamma \vdash \lam{x}{e} \;\; : \;\;\; ?? \rightarrow T}
+
+\end{frame}
+
+\section{Type Inference}
+
 \begin{frame}
 
-  \centering
+  % definition
+  %
+  % we're going to augment the typing rules so that other parts of the expression
+  % can give us hints about the type of the argument
 
-  \begin{tikzpicture}
-    \pic{ triangle={t1}{1.5cm}{-1.5,0}{blue}{} };
-    \node (equals) at (0, 0) {$ = $};
-    \pic{ triangle={t2}{1.5cm}{1.5,0}{blue}{} };
-  \end{tikzpicture}
+  \textbf{infer} /\textipa{In"f@:}/ % /ɪnˈfəː/
+
+  \textit{verb}
+
+  \bigskip
+
+  Deduce or conclude (something) from evidence and reasoning rather than from explicit statements.
 
 \end{frame}
 
 \begin{frame}
 
-  \centering
-
-  \begin{tikzpicture}
-    \pic{ triangle={t1}{1.5cm}{-1.5,0}{green}{} };
-    \node (equals) at (0, 0) {$ = $};
-    \pic{ triangle={t2}{1.5cm}{1.5,0}{green}{} };
-  \end{tikzpicture}
-
-\end{frame}
-
-\begin{frame}
-
-  \centering
-
-  \begin{tikzpicture}
-    \pic{ triangle={t1}{1.5cm}{-1.5,0}{red}{} };
-    \node (equals) at (0, 0) {$ \neq $};
-    \pic{ triangle={t2}{1.5cm}{1.5,0}{blue}{} };
-  \end{tikzpicture}
-
-\end{frame}
-
-\begin{frame}
-
-  \centering
-
-  \begin{tikzpicture}
-    \pic{ triangle={outer1}{2cm}{-2,0}{green}{} };
-    \pic{ triangle={inner1}{1cm}{outer1.base}{blue}{} };
-
-    \node (equals) at (0, 0) {$ = $};
-
-    \pic{ triangle={outer2}{2cm}{2,0}{green}{} };
-    \pic{ triangle={inner2}{1cm}{outer2.base}{blue}{} };
-  \end{tikzpicture}
-
-\end{frame}
-
-\begin{frame}
-
-  \centering
-
-  \begin{tikzpicture}
-    \pic{ triangle={outer1}{2cm}{-2,0}{green}{} };
-    \pic{ triangle={inner1}{1cm}{outer1.base}{blue}{} };
-
-    \node (equals) at (0, 0) {$ \neq $};
-
-    \pic{ triangle={outer2}{2cm}{2,0}{green}{} };
-  \end{tikzpicture}
-
-\end{frame}
-
-\begin{frame}
-
-  \centering
-
-  \begin{tikzpicture}
-    \pic{ triangle={t1}{1.5cm}{-1.5,0}{white}{?0} };
-
-    \node (equals) at (0, 0) {$ = $};
-
-    \pic{ triangle={t2}{1.5cm}{1.5,0}{red}{\phantom{?0}} };
-  \end{tikzpicture}
-
-\end{frame}
-
-\begin{frame}
-
-  \centering
-
-  \begin{tikzpicture}
-    \pic{ triangle={t1}{1.5cm}{-1.5,0}{red}{\phantom{?0}} };
-
-    \node (equals) at (0, 0) {$ = $};
-
-    \pic{ triangle={t2}{1.5cm}{1.5,0}{red}{\phantom{?0}} };
-  \end{tikzpicture}
+  % I want to introduce this different judgement syntax, to represent inference
 
   $$
-    \lbrace \;
-    ?0 \mapsto \tikz[baseline=-0.5ex]
-    \node[
-      shape=isosceles triangle,
-      isosceles triangle apex angle=60,
-      shape border rotate=90,
-      draw=black,
-      fill=red,
-      anchor=base
-    ] {};
-    \; \rbrace
+  \Gamma \vdash x \Rightarrow T
   $$
 
 \end{frame}
 
 \begin{frame}
 
-  \centering
+  % What I want to note is that the context and term are inputs
 
-  \begin{tikzpicture}
-    \pic{ triangle={outer1}{3cm}{-2,0}{blue}{} };
-    \pic{ triangle={inner1}{1cm}{outer1.center}{green}{\phantom{?0}} };
-
-    \node (equals) at (0, 0) {$ = $};
-
-    \pic{ triangle={outer2}{3cm}{2,0}{blue}{} };
-    \pic{ triangle={inner2}{1cm}{outer2.center}{white}{?0} };
-  \end{tikzpicture}
+  \[
+  \bluebox{$\Gamma$} \vdash \bluebox{$x$} \Rightarrow T
+  \]
 
 \end{frame}
 
 \begin{frame}
 
-  \centering
+  % And the type is the output
+  %
+  % We're using what we know to infer/synthesise/conjure out of thin air
 
-  \begin{tikzpicture}
-    \pic{ triangle={outer1}{3cm}{-2,0}{blue}{} };
-    \pic{ triangle={inner1}{1cm}{outer1.center}{green}{\phantom{?0}} };
-
-    \node (equals) at (0, 0) {$ = $};
-
-    \pic{ triangle={outer2}{3cm}{2,0}{blue}{} };
-    \pic{ triangle={inner2}{1cm}{outer2.center}{green}{\phantom{?0}} };
-  \end{tikzpicture}
-
-  $$
-    \lbrace \;
-    ?0 \mapsto \tikz[baseline=-0.5ex]
-    \node[
-      shape=isosceles triangle,
-      isosceles triangle apex angle=60,
-      shape border rotate=90,
-      draw=black,
-      fill=green,
-      anchor=base
-    ] {};
-    \; \rbrace
-  $$
+  \[
+  \Gamma \vdash x \Rightarrow \greenbox{$T$}
+  \]
 
 \end{frame}
 
 \begin{frame}
 
-  \begin{tikzpicture}
-    \node[
-      shape=isosceles triangle,
-      isosceles triangle apex angle=60,
-      shape border rotate=90,
-      draw=black,
-      minimum width=4cm,
-      fill=blue!20
-    ] (bigt) at (0, 0) {};
+  % Some of our typing rules automatically work with inference
 
-    \node[
-      shape=isosceles triangle,
-      isosceles triangle apex angle=60,
-      shape border rotate=90,
-      minimum width=1.75cm,
-    ] (medt) at (bigt.base) {};
+  \infrule[T-var]
+    {}
+    {\Gamma , \; x : T \vdash x \Rightarrow T}
 
-    \pic{ triangle={t1}{1cm}{medt.apex}{white}{?0} };
-    \pic{ triangle={t2}{1cm}{medt.left corner}{white}{?1} };
-    \pic{ triangle={t3}{1cm}{medt.right corner}{white}{?2} };
-  \end{tikzpicture}
+  \infrule[T-lam-ann]
+    {\Gamma , \; x : S \vdash e \Rightarrow T}
+    {\Gamma \vdash \lamann{x}{S}{e} \;\; \Rightarrow \;\; S \rightarrow T}
+
+  \infrule[T-true]
+    {}
+    {\Gamma \vdash \true \Rightarrow \Bool}
+
+  \infrule[T-false]
+    {}
+    {\Gamma \vdash \false \Rightarrow \Bool}
+
+\end{frame}
+
+\begin{frame}
+
+  % The cool thing with this presentation is that we can read the rules
+  % very 'algorithmically'
+  %
+  % You read them in a clockwise manner, and they transform inputs into outputs
+
+  \infrule[T-lam-ann]
+    {\Gamma , \; x : S \vdash e \Rightarrow T}
+    {\Gamma \vdash \lamann{x}{S}{e} \;\; \Rightarrow \;\; S \rightarrow T}
+
+\end{frame}
+
+\begin{frame}
+
+  % I'm given a lambda term - so I have access to a context, and the term w/ type annotation
+
+  \infrule[T-lam-ann]
+    {\Gamma , \; x : S \vdash e \Rightarrow T}
+    {\bluebox{$\Gamma$} \vdash \bluebox{$\lamann{x}{S}{e}$} \;\; \Rightarrow \;\; S \rightarrow T}
+
+\end{frame}
+
+\begin{frame}
+
+  % Then I will as what the type of its body is
+
+  \infrule[T-lam-ann]
+    {\bluebox{$\Gamma , \; x : S$} \vdash \bluebox{$e$} \Rightarrow T}
+    {\Gamma \vdash \lamann{x}{S}{e} \;\; \Rightarrow \;\; S \rightarrow T}
+
+\end{frame}
+
+\begin{frame}
+
+  % And get an answer
+
+  \infrule[T-lam-ann]
+    {\Gamma , \; x : S \vdash e \Rightarrow \greenbox{$T$}}
+    {\Gamma \vdash \lamann{x}{S}{e} \;\; \Rightarrow \;\; S \rightarrow T}
+
+\end{frame}
+
+\begin{frame}
+
+  % Then I will report back that the type of the whole thing is a function
+  % from the type of its argument to the type of its body
+
+  \infrule[T-lam-ann]
+    {\Gamma , \; x : S \vdash e \Rightarrow T}
+    {\Gamma \vdash \lamann{x}{S}{e} \;\; \Rightarrow \;\; \greenbox{$S \rightarrow T$}}
+
+\end{frame}
+
+\begin{frame}
+
+  % to add the rest of the rules, we're going to need some extra machinery
+  %
+  % start with meta variables
+  %
+  % these are variables that we only use during type checking. they're not part
+  % of the syntax that the user interacts with (hence 'meta')
+
+  \[
+  \begin{aligned}
+  meta ::= \\
+   ~ & ?^0 \\
+   ~ & ?^1 \\
+   ~ & \dots \\
+   ~ & ?^n \\ \\
+  Type ::= \\
+   ~ & \dots \\
+   ~ & meta \; \text{(only during type-checking)}
+  \end{aligned}
+  \]
+
+\end{frame}
+
+\begin{frame}
+
+  % Here we're given an un-annotated lambda term, which means we're going to have
+  % to guess it.
+  %
+  % We guess it by generating a new meta variable (one that hasn't been used yet)
+  % to stand in for whatever the argument type will eventually be
+  %
+  % We infer the body as normal, and then the inferred type of the lambda is
+  % a function from 'something' to the body type
+
+  \infrule[T-lam]
+    {new(?^n) \andalso \Gamma , \; x : \; ?^n \vdash e \Rightarrow T}
+    {\Gamma \vdash \lam{x}{e} \;\; \Rightarrow \;\; ?^n \rightarrow T}
+
+\end{frame}
+
+\begin{frame}
+
+  % I would have laid all the assumptions out on the same line but they were getting
+  % too big for the slide
+  %
+  % You can still read this in a clockwise order
+  %
+  % To infer the type of an application:
+  %
+  % 1. infer the function
+  % 2. infer the argument
+  %
+  % Notice that we haven't looked at f's type. We know it needs to be a function type.
+  % And we know the type of its argument, because we inferred a type for x. But what
+  % should the return type be?
+
+  \infrule[T-app]{
+    \phantom{ \Gamma \vdash x \Rightarrow T \andalso new(?^n) } \andalso \\
+    \phantom{ \Gamma \vdash f \Rightarrow S \andalso S = T \rightarrow \; ?^n }
+  }{\phantom{ \Gamma \vdash f \; x \;\; \Rightarrow \;\; ?^n }}
+
+\end{frame}
+
+\begin{frame}
+
+  % given a context and an application
+
+  \infrule[T-app]{
+    \phantom{ \Gamma \vdash x \Rightarrow T \andalso new(?^n) } \andalso \\
+    \Gamma \vdash f \Rightarrow \phantom{S} \andalso \phantom{ S = T \rightarrow \; ?^n }
+  }{\bluebox{$\Gamma$} \vdash \bluebox{$f \; x$} \;\; \Rightarrow \;\; \phantom{ ?^n }}
+
+\end{frame}
+
+\begin{frame}
+
+  % first, infer the type of the f
+
+  \infrule[T-app]{
+    \phantom{ \Gamma \vdash x \Rightarrow T \andalso new(?^n) } \andalso \\
+    \bluebox{$\Gamma$} \vdash \bluebox{$f$} \Rightarrow \phantom{S} \andalso \phantom{ S = T \rightarrow \; ?^n }
+  }{\Gamma \vdash f \; x \;\; \Rightarrow \;\; \phantom{ ?^n }}
+
+\end{frame}
+
+\begin{frame}
+
+  % we get some answer. call it S
+
+  \infrule[T-app]{
+    \phantom{ \Gamma \vdash x \Rightarrow T \andalso new(?^n) } \andalso \\
+    \Gamma \vdash f \Rightarrow \greenbox{$S$} \andalso \phantom{ S = T \rightarrow \; ?^n }
+  }{\Gamma \vdash f \; x \;\; \Rightarrow \;\; \phantom{ ?^n }}
+
+\end{frame}
+
+\begin{frame}
+
+  % next, infer the type of the x
+
+  \infrule[T-app]{
+    \bluebox{$\Gamma$} \vdash \bluebox{$x$} \Rightarrow \phantom{T} \andalso \phantom{ new(?^n) } \andalso \\
+    \Gamma \vdash f \Rightarrow S \andalso \phantom{ S = T \rightarrow \; ?^n }
+  }{\Gamma \vdash f \; x \;\; \Rightarrow \;\; \phantom{ ?^n }}
+
+\end{frame}
+
+\begin{frame}
+
+  % we'll call that T
+  %
+  % even though we've inferred the types of the subterms, we don't have enough information
+  % to make a conclusion.
+  %
+  % We don't know whether or not S is a function or not
+  %
+  % There are two valid cases for S - it could be a function arrow, or it could be a
+  % metavariable. Anything else would be a type error. We could instead write two
+  % typing rules, one for each possibility, but then we wouldn't have a syntax directed
+  % system any more.
+  %
+  % Instead, I'm going to do something that accounts for all valid cases
+
+  \infrule[T-app]{
+    \Gamma \vdash x \Rightarrow \greenbox{$T$} \andalso \phantom{ new(?^n) } \andalso \\
+    \Gamma \vdash f \Rightarrow S \andalso \phantom{ S = T \rightarrow \; ?^n }
+  }{\Gamma \vdash f \; x \;\; \Rightarrow \;\; \phantom{ ?^n }}
+
+\end{frame}
+
+\begin{frame}
+
+  % First, generate a fresh meta (brace yourselves, I think this is really cool)
+
+  \infrule[T-app]{
+    \Gamma \vdash x \Rightarrow T \andalso \greenbox{$new(?^n)$} \andalso \\
+    \Gamma \vdash f \Rightarrow S \andalso \phantom{ S = T \rightarrow \; ?^n }
+  }{\Gamma \vdash f \; x \;\; \Rightarrow \;\; \phantom{ ?^n }}
+
+\end{frame}
+
+\begin{frame}
+
+  % Then we add a side condition - a constraint that S should be equal to
+  % T arrow meta.
+
+  \infrule[T-app]{
+    \Gamma \vdash x \Rightarrow T \andalso new(?^n) \andalso \\
+    \Gamma \vdash f \Rightarrow S \andalso \redbox{$S = T \rightarrow \; ?^n$}
+  }{\Gamma \vdash f \; x \;\; \Rightarrow \;\; \phantom{ ?^n }}
+
+\end{frame}
+
+\begin{frame}
+
+  \infrule[T-app]{
+    \Gamma \vdash x \Rightarrow T \andalso new(?^n) \andalso \\
+    \Gamma \vdash f \Rightarrow S \andalso S = T \rightarrow \; ?^n
+  }{\Gamma \vdash f \; x \;\; \Rightarrow \;\; \greenbox{$?^n$}}
+
+\end{frame}
+
+\begin{frame}
+
+  \infrule[T-if]{
+    \phantom{ \Gamma \vdash x \Rightarrow T_1 } \andalso \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso \phantom{ B = \Bool } \\
+    \phantom{ \Gamma \vdash b \Rightarrow B }   \andalso \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso \phantom{ T_1 = T_2 }
+  }{\phantom{ \Gamma \vdash \ifte{b}{x}{y} \;\; \Rightarrow \;\; } \phantom{ T_1 }}
+
+\end{frame}
+
+\begin{frame}
+
+  \infrule[T-if]{
+    \phantom{ \Gamma \vdash x \Rightarrow T_1 } \andalso \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso \phantom{ B = \Bool } \\
+    \phantom{ \Gamma \vdash b \Rightarrow B }   \andalso \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso \phantom{ T_1 = T_2 }
+  }{\bluebox{$\Gamma$} \vdash \bluebox{$\ifte{b}{x}{y}$} \;\; \Rightarrow \;\; \phantom{ T_1 }}
+
+\end{frame}
+
+\begin{frame}
+
+  \infrule[T-if]{
+    \phantom{ \Gamma \vdash x \Rightarrow T_1 } \andalso \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso \phantom{ B = \Bool } \\
+    \bluebox{$\Gamma$} \vdash \bluebox{$b$} \Rightarrow \phantom{ B }   \andalso \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso \phantom{ T_1 = T_2 }
+  }{\Gamma \vdash \ifte{b}{x}{y} \;\; \Rightarrow \;\; \phantom{ T_1 }}
+
+\end{frame}
+
+\begin{frame}
+
+  \infrule[T-if]{
+    \phantom{ \Gamma \vdash x \Rightarrow T_1 } \andalso \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso \phantom{ B = \Bool } \\
+    \Gamma \vdash b \Rightarrow \greenbox{$B$}  \andalso \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso \phantom{ T_1 = T_2 }
+  }{\Gamma \vdash \ifte{b}{x}{y} \;\; \Rightarrow \;\; \phantom{ T_1 }}
+
+\end{frame}
+
+\begin{frame}
+
+  \infrule[T-if]{
+    \bluebox{$\Gamma$} \vdash \bluebox{$x$} \Rightarrow \phantom{ T_1 } \andalso \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso \phantom{ B = \Bool } \\
+    \Gamma \vdash b \Rightarrow B  \andalso \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso \phantom{ T_1 = T_2 }
+  }{\Gamma \vdash \ifte{b}{x}{y} \;\; \Rightarrow \;\; \phantom{ T_1 }}
+
+\end{frame}
+
+\begin{frame}
+
+  \infrule[T-if]{
+    \Gamma \vdash x \Rightarrow \greenbox{$T_1$} \andalso \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso \phantom{ B = \Bool } \\
+    \Gamma \vdash b \Rightarrow B  \andalso \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso \phantom{ T_1 = T_2 }
+  }{\Gamma \vdash \ifte{b}{x}{y} \;\; \Rightarrow \;\; \phantom{ T_1 }}
+
+\end{frame}
+
+\begin{frame}
+
+  \infrule[T-if]{
+    \Gamma \vdash x \Rightarrow T_1 \andalso \bluebox{$\Gamma$} \vdash \bluebox{$y$} \Rightarrow \phantom{ T_2 } \andalso \phantom{ B = \Bool } \\
+    \Gamma \vdash b \Rightarrow B  \andalso \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso \phantom{ T_1 = T_2 }
+  }{\Gamma \vdash \ifte{b}{x}{y} \;\; \Rightarrow \;\; \phantom{ T_1 }}
+
+\end{frame}
+
+\begin{frame}
+
+  \infrule[T-if]{
+    \Gamma \vdash x \Rightarrow T_1 \andalso \Gamma \vdash y \Rightarrow \greenbox{$T_2$} \andalso \phantom{ B = \Bool } \\
+    \Gamma \vdash b \Rightarrow B  \andalso \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso \phantom{ T_1 = T_2 }
+  }{\Gamma \vdash \ifte{b}{x}{y} \;\; \Rightarrow \;\; \phantom{ T_1 }}
+
+\end{frame}
+
+\begin{frame}
+
+  \infrule[T-if]{
+    \Gamma \vdash x \Rightarrow T_1 \andalso \Gamma \vdash y \Rightarrow T_2 \andalso \redbox{$B = \Bool$} \\
+    \Gamma \vdash b \Rightarrow B  \andalso \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso \phantom{ T_1 = T_2 }
+  }{\Gamma \vdash \ifte{b}{x}{y} \;\; \Rightarrow \;\; \phantom{ T_1 }}
+
+\end{frame}
+
+\begin{frame}
+
+  \infrule[T-if]{
+    \Gamma \vdash x \Rightarrow T_1 \andalso \Gamma \vdash y \Rightarrow T_2 \andalso B = \Bool \\
+    \Gamma \vdash b \Rightarrow B  \andalso \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso \redbox{$T_1 = T_2$}
+  }{\Gamma \vdash \ifte{b}{x}{y} \;\; \Rightarrow \;\; \phantom{ T_1 }}
+
+\end{frame}
+
+\begin{frame}
+
+  \infrule[T-if]{
+    \Gamma \vdash x \Rightarrow T_1 \andalso \Gamma \vdash y \Rightarrow T_2 \andalso B = \Bool \\
+    \Gamma \vdash b \Rightarrow B  \andalso \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso T_1 = T_2
+  }{\Gamma \vdash \ifte{b}{x}{y} \;\; \Rightarrow \;\; \greenbox{$T_1$} }
 
 \end{frame}
 

@@ -6,7 +6,7 @@ pkgs.callPackage
      src = ./.;
      buildInputs = [
        (texlive.combine {
-          inherit (texlive) scheme-full beamer;
+          inherit (texlive) scheme-full beamer prftree pgf;
         })
      ];
      buildPhase = ''pdflatex *.tex'';
