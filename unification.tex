@@ -437,21 +437,19 @@
   \newcommand{\BtozeroGreen}{ \greenboxon{35,36}{\Btozero} }
   \newcommand{\BtozeroRed}{ \redboxon{35,36}{\Btozero} }
   \newcommand{\TOnetoBool}{ \changeto{44}{T_1}{\Bool} }
-  \newcommand{\TOnetoBoolBlue}{ \blueboxon{43,44}{ \TOnetoBool } }
   \newcommand{\TOnetoBoolGreen}{ \greenboxon{43,44}{ \TOnetoBool } }
   \newcommand{\TOnetoBoolRed}{ \redboxon{43,44}{ \TOnetoBool } }
   \newcommand{\TTwotoBool}{ \changeto{52}{T_2}{\Bool} }
-  \newcommand{\TTwotoBoolBlue}{ \blueboxon{51,52}{\TTwotoBool} }
   \newcommand{\TTwotoBoolGreen}{ \greenboxon{51,52}{\TTwotoBool} }
   \newcommand{\TTwotoBoolRed}{ \redboxon{51,52}{\TTwotoBool} }
 
   \only<\ifslides>{
   \infrule[T-if]{
-    \gammatogammabA \vdash \xtofalse \Rightarrow \TOnetoBoolBlue \andalso
-    \gammatogammabA \vdash \ytotrue \Rightarrow \TTwotoBoolBlue \andalso
+    \gammatogammabA \vdash \xtofalse \Rightarrow \TOnetoBoolGreen \andalso
+    \gammatogammabA \vdash \ytotrue \Rightarrow \TTwotoBoolGreen \andalso
     \BtozeroRed = \Bool \\
     \gammatogammabA \vdash \btob \Rightarrow \BtozeroGreen \andalso
-    \phantom{ \gammatogammabA \vdash \ytotrue \Rightarrow \TTwotoBoolBlue } \andalso
+    \phantom{ \gammatogammabA \vdash \ytotrue \Rightarrow \TTwotoBoolGreen } \andalso
     \TOnetoBoolRed = \TTwotoBoolRed
   }{\gammatogammabA \vdash \ifte{\btob}{\xtofalse}{\ytotrue} \;\; \Rightarrow \;\; \TOnetoBoolGreen }
   }
