@@ -149,9 +149,9 @@
   % let's design a typing rule for it
 
   \infrule[T-lam]{
-    \onslide<3->{\blueboxon{3}{\Gamma} ,\; \blueboxon{3,4}{x : \; \onslide<4->{??}} \vdash} \onslide<5->{\greenboxon{5}{e : T}}
+    \onslide<3->{\blueboxon{3,4,5}{\Gamma ,\; x : \; \onslide<4->{??}} \vdash \blueboxon{3,4,5}{\onslide<5->{e :}}} \onslide<6->{\greenboxon{6}{T}}
   }{
-    \onslide<2->{\blueboxon{2}{\Gamma} \vdash \blueboxon{2}{\lam{x}{e}} \;\; :} \;\; \onslide<6->{\greenboxon{6}{?? \rightarrow T}}
+    \onslide<2->{\blueboxon{2}{\Gamma} \vdash \blueboxon{2}{\lam{x}{e}} \;\; :} \;\; \onslide<7->{\greenboxon{7}{?? \rightarrow T}}
   }
 
 \end{frame}
@@ -192,33 +192,10 @@
   \frametitle
 
   % I want to introduce this different judgement syntax, to represent inference
-
-  $$
-  \Gamma \vdash x \Rightarrow T
-  $$
-
-\end{frame}
-
-\begin{frame}
-  \frametitle
-
   % What I want to note is that the context and term are inputs
 
   \[
-  \bluebox{$\Gamma$} \vdash \bluebox{$x$} \Rightarrow T
-  \]
-
-\end{frame}
-
-\begin{frame}
-  \frametitle
-
-  % And the type is the output
-  %
-  % We're using what we know to infer/synthesise/conjure out of thin air
-
-  \[
-  \Gamma \vdash x \Rightarrow \greenbox{$T$}
+  \blueboxon{2}{\Gamma} \vdash \blueboxon{2}{x} \Rightarrow \greenboxon{3}{T}
   \]
 
 \end{frame}
@@ -255,53 +232,8 @@
   % You read them in a clockwise manner, and they transform inputs into outputs
 
   \infrule[T-lam-ann]
-    {\Gamma , \; x : S \vdash e \Rightarrow T}
-    {\Gamma \vdash \lamann{x}{S}{e} \;\; \Rightarrow \;\; S \rightarrow T}
-
-\end{frame}
-
-\begin{frame}
-  \frametitle
-
-  % I'm given a lambda term - so I have access to a context, and the term w/ type annotation
-
-  \infrule[T-lam-ann]
-    {\Gamma , \; x : S \vdash e \Rightarrow T}
-    {\bluebox{$\Gamma$} \vdash \bluebox{$\lamann{x}{S}{e}$} \;\; \Rightarrow \;\; S \rightarrow T}
-
-\end{frame}
-
-\begin{frame}
-  \frametitle
-
-  % Then I will as what the type of its body is
-
-  \infrule[T-lam-ann]
-    {\bluebox{$\Gamma , \; x : S$} \vdash \bluebox{$e$} \Rightarrow T}
-    {\Gamma \vdash \lamann{x}{S}{e} \;\; \Rightarrow \;\; S \rightarrow T}
-
-\end{frame}
-
-\begin{frame}
-  \frametitle
-
-  % And get an answer
-
-  \infrule[T-lam-ann]
-    {\Gamma , \; x : S \vdash e \Rightarrow \greenbox{$T$}}
-    {\Gamma \vdash \lamann{x}{S}{e} \;\; \Rightarrow \;\; S \rightarrow T}
-
-\end{frame}
-
-\begin{frame}
-  \frametitle
-
-  % Then I will report back that the type of the whole thing is a function
-  % from the type of its argument to the type of its body
-
-  \infrule[T-lam-ann]
-    {\Gamma , \; x : S \vdash e \Rightarrow T}
-    {\Gamma \vdash \lamann{x}{S}{e} \;\; \Rightarrow \;\; \greenbox{$S \rightarrow T$}}
+    {\blueboxon{3}{\Gamma , \; x : S} \vdash \blueboxon{3}{e} \Rightarrow \greenboxon{4}{T}}
+    {\blueboxon{2}{\Gamma} \vdash \blueboxon{2}{\lamann{x}{S}{e}} \;\; \Rightarrow \;\; \greenboxon{5}{S \rightarrow T}}
 
 \end{frame}
 
@@ -394,6 +326,13 @@
 
 \end{frame}
 
+\begin{frame}
+  \frametitle
+
+  \[ \lam{b}{\ifte{b}{\false}{\true}} \]
+
+\end{frame}
+
 \newcommand{\highlighton}[1]{ \temporal<#1>{\color{black!50}}{\color{black}}{\color{black!50}} }
 \newcommand{\changeto}[3]{ \temporal<#1>{#2}{#3}{#3} }
 
@@ -475,15 +414,18 @@
 
   \newcommand{\xtobA}{ \blueboxon{3,4}{ \changeto{4}{x}{b} } }
   \newcommand{\etoif}{ \blueboxon{6,7}{ \changeto{7}{e}{\iftebfalsetrue} } }
-  \newcommand{\ntozero}{ \blueboxon{9,10}{ \changeto{10}{?^n}{?^0} } }
-  \newcommand{\TtoBool}{ \blueboxon{57,58}{ \changeto{58}{T}{\Bool} } }
+  \newcommand{\ntozero}{ \changeto{10}{?^n}{?^0} }
+  \newcommand{\ntozeroBlue}{ \blueboxon{9,10}{\ntozero} }
+  \newcommand{\ntozeroGreen}{ \greenboxon{9,10}{\ntozero} }
+  \newcommand{\ntozeroRed}{ \redboxon{9,10}{\ntozero} }
+  \newcommand{\TtoBool}{ \greenboxon{57,58}{ \changeto{58}{T}{\Bool} } }
 
   \only<\lamslides>{
   \infrule[T-lam]{
-    new(\ntozero) \andalso \Gamma , \; \xtobA : \; \ntozero \vdash
+    new(\ntozeroRed) \andalso \Gamma , \; \xtobA : \; \ntozeroBlue \vdash
     \etoif \Rightarrow \TtoBool
   }{
-    \Gamma \vdash \lam{ \xtobA }{ \etoif } \;\; \Rightarrow \;\; \ntozero \rightarrow \TtoBool
+    \Gamma \vdash \lam{ \xtobA }{ \etoif } \;\; \Rightarrow \;\; \ntozeroGreen \rightarrow \TtoBool
   }
   }
 
@@ -491,30 +433,38 @@
   \newcommand{\btob}{ \blueboxon{16}{b} }
   \newcommand{\xtofalse}{ \blueboxon{18,19}{ \changeto{19}{x}{\false} } }
   \newcommand{\ytotrue}{ \blueboxon{21,22}{ \changeto{22}{y}{\true} } }
-  \newcommand{\Btozero}{ \blueboxon{35,36}{ \changeto{36}{B}{?^0} } }
+  \newcommand{\Btozero}{ \changeto{36}{B}{?^0} }
+  \newcommand{\BtozeroGreen}{ \greenboxon{35,36}{\Btozero} }
+  \newcommand{\BtozeroRed}{ \redboxon{35,36}{\Btozero} }
   \newcommand{\TOnetoBool}{ \changeto{44}{T_1}{\Bool} }
   \newcommand{\TOnetoBoolBlue}{ \blueboxon{43,44}{ \TOnetoBool } }
   \newcommand{\TOnetoBoolGreen}{ \greenboxon{43,44}{ \TOnetoBool } }
-  \newcommand{\TTwotoBool}{ \blueboxon{51,52}{ \changeto{52}{T_2}{\Bool} } }
+  \newcommand{\TOnetoBoolRed}{ \redboxon{43,44}{ \TOnetoBool } }
+  \newcommand{\TTwotoBool}{ \changeto{52}{T_2}{\Bool} }
+  \newcommand{\TTwotoBoolBlue}{ \blueboxon{51,52}{\TTwotoBool} }
+  \newcommand{\TTwotoBoolGreen}{ \greenboxon{51,52}{\TTwotoBool} }
+  \newcommand{\TTwotoBoolRed}{ \redboxon{51,52}{\TTwotoBool} }
 
   \only<\ifslides>{
   \infrule[T-if]{
     \gammatogammabA \vdash \xtofalse \Rightarrow \TOnetoBoolBlue \andalso
-    \gammatogammabA \vdash \ytotrue \Rightarrow \TTwotoBool \andalso
-    \Btozero = \Bool \\
-    \gammatogammabA \vdash \btob \Rightarrow \Btozero \andalso
-    \phantom{ \gammatogammabA \vdash \ytotrue \Rightarrow \TTwotoBool } \andalso
-    \TOnetoBoolBlue = \TTwotoBool
+    \gammatogammabA \vdash \ytotrue \Rightarrow \TTwotoBoolBlue \andalso
+    \BtozeroRed = \Bool \\
+    \gammatogammabA \vdash \btob \Rightarrow \BtozeroGreen \andalso
+    \phantom{ \gammatogammabA \vdash \ytotrue \Rightarrow \TTwotoBoolBlue } \andalso
+    \TOnetoBoolRed = \TTwotoBoolRed
   }{\gammatogammabA \vdash \ifte{\btob}{\xtofalse}{\ytotrue} \;\; \Rightarrow \;\; \TOnetoBoolGreen }
   }
 
   \newcommand{\xtobB}{ \blueboxon{28,29}{ \changeto{29}{x}{b} } }
   \newcommand{\ttozero}{ \changeto{32}{T}{?^0} }
-  \newcommand{\gammatogammabB}{ \blueboxon{25,26}{ \changeto{26}{\Gamma}{\Gamma,\; b : \; \blueboxon{31,32}{\ttozero}} } }
+  \newcommand{\ttozeroBlue}{ \blueboxon{31,32}{\ttozero} }
+  \newcommand{\ttozeroGreen}{ \greenboxon{31,32}{\ttozero} }
+  \newcommand{\gammatogammabB}{ \blueboxon{25,26}{ \changeto{26}{\Gamma}{\Gamma,\; b : \; \ttozeroBlue } } }
 
   \only<\varslides>{
     \infrule[T-var]{}{
-      \gammatogammabB \vdash \xtobB \Rightarrow \greenboxon{31,32}{\ttozero}
+      \gammatogammabB \vdash \xtobB \Rightarrow \ttozeroGreen
     }
   }
 
