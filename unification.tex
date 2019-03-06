@@ -1,6 +1,8 @@
-\documentclass{beamer}
+\documentclass[aspectratio=169]{beamer}
 \usepackage{bcprules, textcomp, prftree, amsmath, tikz}
 \usepackage[safe]{tipa}
+
+\setbeamercolor{background canvas}{bg=black!3}
 
 \newcommand{\ifte}[3]{\texttt{if} \; {#1} \; \texttt{then} \; {#2} \; \texttt{else} \; {#3}}
 \newcommand{\lamann}[3]{\lambda {#1} \texttt{:} {#2} \texttt{.} \; {#3}}
@@ -11,6 +13,12 @@
 \newcommand{\bluebox}[1]{\tikz[baseline] \node[fill=blue!20,rectangle,anchor=text]{#1}; }
 \newcommand{\greenbox}[1]{\tikz[baseline] \node[fill=green!20,rectangle,anchor=text]{#1}; }
 \newcommand{\redbox}[1]{\tikz[baseline] \node[fill=red!20,rectangle,anchor=text]{#1}; }
+\newcommand{\blueoutline}[1]{\tikz \node[draw=beamer@blendedblue, rectangle]{#1}; }
+\newcommand{\blueboxon}[2]{ \temporal<#1>{#2}{\bluebox{$#2$}}{#2} }
+\newcommand{\greenboxon}[2]{ \temporal<#1>{#2}{\greenbox{$#2$}}{#2} }
+\newcommand{\redboxon}[2]{ \temporal<#1>{#2}{\redbox{$#2$}}{#2} }
+
+\addtobeamertemplate{frametitle}{\let\insertframetitle\insertsectionhead}{}
 
 \defbeamertemplate{section page}{minimal}[1][]{
   \begin{centering}{}
@@ -28,13 +36,14 @@
 \author{Isaac Elliott}
 
 \begin{document}
+\beamertemplatenavigationsymbolsempty
 
 \frame{\titlepage}
 
 \section{STLC}
 
 \begin{frame}
-  \frametitle{STLC}
+  \frametitle
 
   % here's the presentation of our familiar simply-typed lambda calculus
 
@@ -56,7 +65,7 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{STLC}
+  \frametitle
 
   % typing rules
 
@@ -87,7 +96,7 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{STLC}
+  \frametitle
 
   %% what's the type of this expression?
 
@@ -98,7 +107,7 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{STLC}
+  \frametitle
 
   %% what's the type of this expression?
 
@@ -109,7 +118,7 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{STLC}
+  \frametitle
 
   %% but if I left off the annotation, would that change your answer?
 
@@ -120,20 +129,7 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{STLC}
-
-  % one problem with STLC is that we have to add type annotations to every
-  % lambda, even if the type of the argument is *obvious* given how it's used
-  % in the body
-
-  \[
-  \lamann{\texttt{b}}{\Bool}{\ifte{\texttt{b}}{\false}{\true}}
-  \]
-
-\end{frame}
-
-\begin{frame}
-  \frametitle{STLC}
+  \frametitle
 
   % the syntax is straightforward
 
@@ -148,54 +144,20 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{STLC}
+  \frametitle
 
   % let's design a typing rule for it
 
-  \infrule[T-lam]
-    {\phantom{ \Gamma , \; x : \; ?? } \vdash \phantom{ e : T }}
-    {\Gamma \vdash \lam{x}{e} \;\; : \phantom{ \;\; ? \rightarrow T }}
+  \infrule[T-lam]{
+    \onslide<3->{\blueboxon{3}{\Gamma} ,\; \blueboxon{3,4}{x : \; \onslide<4->{??}} \vdash} \onslide<5->{\greenboxon{5}{e : T}}
+  }{
+    \onslide<2->{\blueboxon{2}{\Gamma} \vdash \blueboxon{2}{\lam{x}{e}} \;\; :} \;\; \onslide<6->{\greenboxon{6}{?? \rightarrow T}}
+  }
 
 \end{frame}
 
 \begin{frame}
-  \frametitle{STLC}
-
-  \infrule[T-lam]
-    {\Gamma \phantom{, \; x : \; ?? } \vdash \phantom{ e : T }}
-    {\Gamma \vdash \lam{x}{e} \;\; : \phantom{ \;\; ? \rightarrow T }}
-
-\end{frame}
-
-\begin{frame}
-  \frametitle{STLC}
-
-  \infrule[T-lam]
-    {\Gamma , \; x \phantom{: \; ?? } \vdash \phantom{ e : T }}
-    {\Gamma \vdash \lam{x}{e} \;\; : \phantom{ \;\; ? \rightarrow T }}
-
-\end{frame}
-
-\begin{frame}
-  \frametitle{STLC}
-
-  \infrule[T-lam]
-    {\Gamma , \; x : \; ?? \vdash \phantom{ e : T }}
-    {\Gamma \vdash \lam{x}{e} \;\; : \phantom{ \;\; ? \rightarrow T }}
-
-\end{frame}
-
-\begin{frame}
-  \frametitle{STLC}
-
-  \infrule[T-lam]
-    {\Gamma , \; x : \; ?? \vdash e : T}
-    {\Gamma \vdash \lam{x}{e} \;\; : \phantom{ \;\; ? \rightarrow T }}
-
-\end{frame}
-
-\begin{frame}
-  \frametitle{STLC}
+  \frametitle
 
   % Solving these kinds of problems is the essence of *type inference*
   % There is an unknown type, and we need
@@ -209,6 +171,7 @@
 \section{Type Inference}
 
 \begin{frame}
+  \frametitle
 
   % definition
   %
@@ -226,6 +189,7 @@
 \end{frame}
 
 \begin{frame}
+  \frametitle
 
   % I want to introduce this different judgement syntax, to represent inference
 
@@ -236,6 +200,7 @@
 \end{frame}
 
 \begin{frame}
+  \frametitle
 
   % What I want to note is that the context and term are inputs
 
@@ -246,6 +211,7 @@
 \end{frame}
 
 \begin{frame}
+  \frametitle
 
   % And the type is the output
   %
@@ -258,6 +224,7 @@
 \end{frame}
 
 \begin{frame}
+  \frametitle
 
   % Some of our typing rules automatically work with inference
 
@@ -280,6 +247,7 @@
 \end{frame}
 
 \begin{frame}
+  \frametitle
 
   % The cool thing with this presentation is that we can read the rules
   % very 'algorithmically'
@@ -293,6 +261,7 @@
 \end{frame}
 
 \begin{frame}
+  \frametitle
 
   % I'm given a lambda term - so I have access to a context, and the term w/ type annotation
 
@@ -303,6 +272,7 @@
 \end{frame}
 
 \begin{frame}
+  \frametitle
 
   % Then I will as what the type of its body is
 
@@ -313,6 +283,7 @@
 \end{frame}
 
 \begin{frame}
+  \frametitle
 
   % And get an answer
 
@@ -323,6 +294,7 @@
 \end{frame}
 
 \begin{frame}
+  \frametitle
 
   % Then I will report back that the type of the whole thing is a function
   % from the type of its argument to the type of its body
@@ -334,6 +306,7 @@
 \end{frame}
 
 \begin{frame}
+  \frametitle
 
   % to add the rest of the rules, we're going to need some extra machinery
   %
@@ -344,20 +317,21 @@
 
   \[
   \begin{aligned}
-  meta ::= \\
-   ~ & ?^0 \\
-   ~ & ?^1 \\
-   ~ & \dots \\
-   ~ & ?^n \\ \\
-  Type ::= \\
-   ~ & \dots \\
-   ~ & meta \; \text{(only during type-checking)}
+    meta ::= \\
+    ~ & ?^0 \\
+    ~ & ?^1 \\
+    ~ & \dots \\
+    ~ & ?^n \\ \\
+    Type ::= \\
+    ~ & \dots \\
+    ~ & meta \; \text{(only during type-checking)}
   \end{aligned}
   \]
 
 \end{frame}
 
 \begin{frame}
+  \frametitle
 
   % Here we're given an un-annotated lambda term, which means we're going to have
   % to guess it.
@@ -375,6 +349,7 @@
 \end{frame}
 
 \begin{frame}
+  \frametitle
 
   % I would have laid all the assumptions out on the same line but they were getting
   % too big for the slide
@@ -391,208 +366,201 @@
   % should the return type be?
 
   \infrule[T-app]{
-    \phantom{ \Gamma \vdash x \Rightarrow T \andalso new(?^n) } \andalso \\
-    \phantom{ \Gamma \vdash f \Rightarrow S \andalso S = T \rightarrow \; ?^n }
-  }{\phantom{ \Gamma \vdash f \; x \;\; \Rightarrow \;\; ?^n }}
+    \onslide<5->{\blueboxon{5}{\Gamma} \vdash \blueboxon{5}{x} \Rightarrow} \onslide<6->{\greenboxon{6}{T}} \andalso
+    \onslide<7->{\redboxon{7}{new(?^n)}} \andalso \\
+    \onslide<3->{\blueboxon{3}{\Gamma} \vdash \blueboxon{3}{f} \Rightarrow} \onslide<4->{\greenboxon{4}{S}} \andalso
+    \onslide<8->{\redboxon{8}{S = T \rightarrow \; ?^n}}
+  }{
+    \onslide<2->{\blueboxon{2}{\Gamma} \vdash \blueboxon{2}{f \; x} \;\; \Rightarrow} \;\;
+    \onslide<9->{\greenboxon{9}{?^n}}
+  }
 
 \end{frame}
 
 \begin{frame}
-
-  % given a context and an application
-
-  \infrule[T-app]{
-    \phantom{ \Gamma \vdash x \Rightarrow T \andalso new(?^n) } \andalso \\
-    \Gamma \vdash f \Rightarrow \phantom{S} \andalso \phantom{ S = T \rightarrow \; ?^n }
-  }{\bluebox{$\Gamma$} \vdash \bluebox{$f \; x$} \;\; \Rightarrow \;\; \phantom{ ?^n }}
-
-\end{frame}
-
-\begin{frame}
-
-  % first, infer the type of the f
-
-  \infrule[T-app]{
-    \phantom{ \Gamma \vdash x \Rightarrow T \andalso new(?^n) } \andalso \\
-    \bluebox{$\Gamma$} \vdash \bluebox{$f$} \Rightarrow \phantom{S} \andalso \phantom{ S = T \rightarrow \; ?^n }
-  }{\Gamma \vdash f \; x \;\; \Rightarrow \;\; \phantom{ ?^n }}
-
-\end{frame}
-
-\begin{frame}
-
-  % we get some answer. call it S
-
-  \infrule[T-app]{
-    \phantom{ \Gamma \vdash x \Rightarrow T \andalso new(?^n) } \andalso \\
-    \Gamma \vdash f \Rightarrow \greenbox{$S$} \andalso \phantom{ S = T \rightarrow \; ?^n }
-  }{\Gamma \vdash f \; x \;\; \Rightarrow \;\; \phantom{ ?^n }}
-
-\end{frame}
-
-\begin{frame}
-
-  % next, infer the type of the x
-
-  \infrule[T-app]{
-    \bluebox{$\Gamma$} \vdash \bluebox{$x$} \Rightarrow \phantom{T} \andalso \phantom{ new(?^n) } \andalso \\
-    \Gamma \vdash f \Rightarrow S \andalso \phantom{ S = T \rightarrow \; ?^n }
-  }{\Gamma \vdash f \; x \;\; \Rightarrow \;\; \phantom{ ?^n }}
-
-\end{frame}
-
-\begin{frame}
-
-  % we'll call that T
-  %
-  % even though we've inferred the types of the subterms, we don't have enough information
-  % to make a conclusion.
-  %
-  % We don't know whether or not S is a function or not
-  %
-  % There are two valid cases for S - it could be a function arrow, or it could be a
-  % metavariable. Anything else would be a type error. We could instead write two
-  % typing rules, one for each possibility, but then we wouldn't have a syntax directed
-  % system any more.
-  %
-  % Instead, I'm going to do something that accounts for all valid cases
-
-  \infrule[T-app]{
-    \Gamma \vdash x \Rightarrow \greenbox{$T$} \andalso \phantom{ new(?^n) } \andalso \\
-    \Gamma \vdash f \Rightarrow S \andalso \phantom{ S = T \rightarrow \; ?^n }
-  }{\Gamma \vdash f \; x \;\; \Rightarrow \;\; \phantom{ ?^n }}
-
-\end{frame}
-
-\begin{frame}
-
-  % First, generate a fresh meta (brace yourselves, I think this is really cool)
-
-  \infrule[T-app]{
-    \Gamma \vdash x \Rightarrow T \andalso \greenbox{$new(?^n)$} \andalso \\
-    \Gamma \vdash f \Rightarrow S \andalso \phantom{ S = T \rightarrow \; ?^n }
-  }{\Gamma \vdash f \; x \;\; \Rightarrow \;\; \phantom{ ?^n }}
-
-\end{frame}
-
-\begin{frame}
-
-  % Then we add a side condition - a constraint that S should be equal to
-  % T arrow meta.
-
-  \infrule[T-app]{
-    \Gamma \vdash x \Rightarrow T \andalso new(?^n) \andalso \\
-    \Gamma \vdash f \Rightarrow S \andalso \redbox{$S = T \rightarrow \; ?^n$}
-  }{\Gamma \vdash f \; x \;\; \Rightarrow \;\; \phantom{ ?^n }}
-
-\end{frame}
-
-\begin{frame}
-
-  \infrule[T-app]{
-    \Gamma \vdash x \Rightarrow T \andalso new(?^n) \andalso \\
-    \Gamma \vdash f \Rightarrow S \andalso S = T \rightarrow \; ?^n
-  }{\Gamma \vdash f \; x \;\; \Rightarrow \;\; \greenbox{$?^n$}}
-
-\end{frame}
-
-\begin{frame}
+  \frametitle
 
   \infrule[T-if]{
-    \phantom{ \Gamma \vdash x \Rightarrow T_1 } \andalso \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso \phantom{ B = \Bool } \\
-    \phantom{ \Gamma \vdash b \Rightarrow B }   \andalso \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso \phantom{ T_1 = T_2 }
-  }{\phantom{ \Gamma \vdash \ifte{b}{x}{y} \;\; \Rightarrow \;\; } \phantom{ T_1 }}
+    \onslide<5->{\blueboxon{5}{\Gamma} \vdash \blueboxon{5}{x} \Rightarrow} \onslide<6->{\greenboxon{6}{T_1}} \andalso
+    \onslide<7->{\blueboxon{7}{\Gamma} \vdash \blueboxon{7}{y} \Rightarrow} \onslide<8->{\greenboxon{8}{T_2}} \andalso
+    \onslide<9->{\redboxon{9}{B = \Bool}} \\
+    \onslide<3->{\blueboxon{3}{\Gamma} \vdash \blueboxon{3}{b} \Rightarrow} \onslide<4->{\greenboxon{4}{B}} \andalso
+    \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso
+    \onslide<10->{\redboxon{10}{T_1 = T_2}}
+  }{
+    \onslide<2->{\blueboxon{2}{\Gamma} \vdash \blueboxon{2}{\ifte{b}{x}{y}} \;\; \Rightarrow} \;\;
+    \onslide<11->{\greenboxon{11}{T_1}}
+  }
+
+\end{frame}
+
+\newcommand{\highlighton}[1]{ \temporal<#1>{\color{black!50}}{\color{black}}{\color{black!50}} }
+\newcommand{\changeto}[3]{ \temporal<#1>{#2}{#3}{#3} }
+
+\newcommand{\lamslides}[0]{2-11,56-59}
+\newcommand{\ifslides}[0]{12-23,34-37,42-45,50-53,55}
+\newcommand{\varslides}[0]{24-33}
+\newcommand{\falseslides}[0]{38-41}
+\newcommand{\trueslides}[0]{46-49}
+\newcommand{\constraintslides}[0]{54}
+
+\begin{frame}[t]
+  \frametitle
+
+  \newcommand{\iftebfalsetrue}{\ifte{b}{\false}{\true}}
+
+  \[
+  \blueoutline{
+  \scalebox{0.5}{
+  \highlighton{\lamslides}{
+  \prftree[r]
+    { (\rn{T-lam}) }
+    { new(?^0) }
+    {
+      \highlighton{\ifslides}{
+      \prftree[r]
+        { (\rn{T-if}) }
+        { \highlighton{\varslides}{
+          \prftree[r]
+            { (\rn{T-var}) }
+            {}
+            { \highlighton{\ifslides,\varslides}{
+              \Gamma , \; b : \; ?^0 \vdash b \Rightarrow \; ?^0
+              }
+            }
+          }
+        }
+        { \highlighton{\falseslides}{
+          \prftree[r]
+            { (\rn{T-false}) }
+            {}
+            { \highlighton{\ifslides,\falseslides}{
+              \Gamma , \; b : \; ?^0 \vdash \false \Rightarrow \Bool
+              }
+            }
+          }
+        }
+        { \highlighton{\trueslides}{
+          \prftree[r]
+            { (\rn{T-true}) }
+            {}
+            { \highlighton{\ifslides,\trueslides}{
+              \Gamma , \; b : \; ?^0 \vdash \true \Rightarrow \Bool
+              }
+            }
+          }
+        }
+        { \highlighton{\ifslides,\constraintslides}{
+          \prftree[r, noline]{}{?^0 = \Bool}
+          }
+        }
+        { \highlighton{\ifslides,\constraintslides}{
+          \prftree[r, noline]{}{\Bool = \Bool}
+          }
+        }
+        { 
+          \highlighton{\lamslides,\ifslides}{
+          \Gamma , \; b : \; ?^0 \vdash \iftebfalsetrue \;\; \Rightarrow \;\; \Bool
+          }
+        }
+      }
+    }
+    {
+      \Gamma \vdash \lam{b}{\iftebfalsetrue} \;\; \Rightarrow \;\; ?^0 \rightarrow \Bool
+    }
+  }
+  }
+  }
+  \]
+
+  \newcommand{\xtobA}{ \blueboxon{3,4}{ \changeto{4}{x}{b} } }
+  \newcommand{\etoif}{ \blueboxon{6,7}{ \changeto{7}{e}{\iftebfalsetrue} } }
+  \newcommand{\ntozero}{ \blueboxon{9,10}{ \changeto{10}{?^n}{?^0} } }
+  \newcommand{\TtoBool}{ \blueboxon{57,58}{ \changeto{58}{T}{\Bool} } }
+
+  \only<\lamslides>{
+  \infrule[T-lam]{
+    new(\ntozero) \andalso \Gamma , \; \xtobA : \; \ntozero \vdash
+    \etoif \Rightarrow \TtoBool
+  }{
+    \Gamma \vdash \lam{ \xtobA }{ \etoif } \;\; \Rightarrow \;\; \ntozero \rightarrow \TtoBool
+  }
+  }
+
+  \newcommand{\gammatogammabA}{ \blueboxon{13,14}{ \changeto{14}{\Gamma}{\Gamma,\; b : \; ?^0} } }
+  \newcommand{\btob}{ \blueboxon{16}{b} }
+  \newcommand{\xtofalse}{ \blueboxon{18,19}{ \changeto{19}{x}{\false} } }
+  \newcommand{\ytotrue}{ \blueboxon{21,22}{ \changeto{22}{y}{\true} } }
+  \newcommand{\Btozero}{ \blueboxon{35,36}{ \changeto{36}{B}{?^0} } }
+  \newcommand{\TOnetoBool}{ \changeto{44}{T_1}{\Bool} }
+  \newcommand{\TOnetoBoolBlue}{ \blueboxon{43,44}{ \TOnetoBool } }
+  \newcommand{\TOnetoBoolGreen}{ \greenboxon{43,44}{ \TOnetoBool } }
+  \newcommand{\TTwotoBool}{ \blueboxon{51,52}{ \changeto{52}{T_2}{\Bool} } }
+
+  \only<\ifslides>{
+  \infrule[T-if]{
+    \gammatogammabA \vdash \xtofalse \Rightarrow \TOnetoBoolBlue \andalso
+    \gammatogammabA \vdash \ytotrue \Rightarrow \TTwotoBool \andalso
+    \Btozero = \Bool \\
+    \gammatogammabA \vdash \btob \Rightarrow \Btozero \andalso
+    \phantom{ \gammatogammabA \vdash \ytotrue \Rightarrow \TTwotoBool } \andalso
+    \TOnetoBoolBlue = \TTwotoBool
+  }{\gammatogammabA \vdash \ifte{\btob}{\xtofalse}{\ytotrue} \;\; \Rightarrow \;\; \TOnetoBoolGreen }
+  }
+
+  \newcommand{\xtobB}{ \blueboxon{28,29}{ \changeto{29}{x}{b} } }
+  \newcommand{\ttozero}{ \changeto{32}{T}{?^0} }
+  \newcommand{\gammatogammabB}{ \blueboxon{25,26}{ \changeto{26}{\Gamma}{\Gamma,\; b : \; \blueboxon{31,32}{\ttozero}} } }
+
+  \only<\varslides>{
+    \infrule[T-var]{}{
+      \gammatogammabB \vdash \xtobB \Rightarrow \greenboxon{31,32}{\ttozero}
+    }
+  }
+
+  \newcommand{\gammatogammabC}{ \blueboxon{39,40}{ \changeto{40}{\Gamma}{\Gamma,\; b : \; ?^0} } }
+
+  \only<\falseslides>{
+  \infrule[T-false]{}{
+    \gammatogammabC \vdash \false \Rightarrow \Bool
+  }
+  }
+
+  \newcommand{\gammatogammabD}{ \blueboxon{47,48}{ \changeto{48}{\Gamma}{\Gamma,\; b : \; ?^0} } }
+
+  \only<\trueslides>{
+  \infrule[T-true]{}{
+    \gammatogammabD \vdash \true \Rightarrow \Bool
+  }
+  }
+
+  \only<\constraintslides>{
+    \[ ?^0 = \Bool \]
+    \[ \Bool = \Bool \]
+  }
 
 \end{frame}
 
 \begin{frame}
+  \frametitle
 
-  \infrule[T-if]{
-    \phantom{ \Gamma \vdash x \Rightarrow T_1 } \andalso \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso \phantom{ B = \Bool } \\
-    \phantom{ \Gamma \vdash b \Rightarrow B }   \andalso \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso \phantom{ T_1 = T_2 }
-  }{\bluebox{$\Gamma$} \vdash \bluebox{$\ifte{b}{x}{y}$} \;\; \Rightarrow \;\; \phantom{ T_1 }}
+  \[ ?^0 \rightarrow \Bool \]
 
-\end{frame}
+  \bigskip
 
-\begin{frame}
-
-  \infrule[T-if]{
-    \phantom{ \Gamma \vdash x \Rightarrow T_1 } \andalso \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso \phantom{ B = \Bool } \\
-    \bluebox{$\Gamma$} \vdash \bluebox{$b$} \Rightarrow \phantom{ B }   \andalso \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso \phantom{ T_1 = T_2 }
-  }{\Gamma \vdash \ifte{b}{x}{y} \;\; \Rightarrow \;\; \phantom{ T_1 }}
+  \[ ?^0 = \Bool \]
+  \[ \Bool = \Bool \]
 
 \end{frame}
 
 \begin{frame}
+  \frametitle
 
-  \infrule[T-if]{
-    \phantom{ \Gamma \vdash x \Rightarrow T_1 } \andalso \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso \phantom{ B = \Bool } \\
-    \Gamma \vdash b \Rightarrow \greenbox{$B$}  \andalso \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso \phantom{ T_1 = T_2 }
-  }{\Gamma \vdash \ifte{b}{x}{y} \;\; \Rightarrow \;\; \phantom{ T_1 }}
-
-\end{frame}
-
-\begin{frame}
-
-  \infrule[T-if]{
-    \bluebox{$\Gamma$} \vdash \bluebox{$x$} \Rightarrow \phantom{ T_1 } \andalso \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso \phantom{ B = \Bool } \\
-    \Gamma \vdash b \Rightarrow B  \andalso \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso \phantom{ T_1 = T_2 }
-  }{\Gamma \vdash \ifte{b}{x}{y} \;\; \Rightarrow \;\; \phantom{ T_1 }}
+  \[ \lam{b}{\ifte{b}{\false}{\true}} \]
+  \[ \Bool \rightarrow \Bool \]
 
 \end{frame}
 
-\begin{frame}
-
-  \infrule[T-if]{
-    \Gamma \vdash x \Rightarrow \greenbox{$T_1$} \andalso \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso \phantom{ B = \Bool } \\
-    \Gamma \vdash b \Rightarrow B  \andalso \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso \phantom{ T_1 = T_2 }
-  }{\Gamma \vdash \ifte{b}{x}{y} \;\; \Rightarrow \;\; \phantom{ T_1 }}
-
-\end{frame}
-
-\begin{frame}
-
-  \infrule[T-if]{
-    \Gamma \vdash x \Rightarrow T_1 \andalso \bluebox{$\Gamma$} \vdash \bluebox{$y$} \Rightarrow \phantom{ T_2 } \andalso \phantom{ B = \Bool } \\
-    \Gamma \vdash b \Rightarrow B  \andalso \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso \phantom{ T_1 = T_2 }
-  }{\Gamma \vdash \ifte{b}{x}{y} \;\; \Rightarrow \;\; \phantom{ T_1 }}
-
-\end{frame}
-
-\begin{frame}
-
-  \infrule[T-if]{
-    \Gamma \vdash x \Rightarrow T_1 \andalso \Gamma \vdash y \Rightarrow \greenbox{$T_2$} \andalso \phantom{ B = \Bool } \\
-    \Gamma \vdash b \Rightarrow B  \andalso \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso \phantom{ T_1 = T_2 }
-  }{\Gamma \vdash \ifte{b}{x}{y} \;\; \Rightarrow \;\; \phantom{ T_1 }}
-
-\end{frame}
-
-\begin{frame}
-
-  \infrule[T-if]{
-    \Gamma \vdash x \Rightarrow T_1 \andalso \Gamma \vdash y \Rightarrow T_2 \andalso \redbox{$B = \Bool$} \\
-    \Gamma \vdash b \Rightarrow B  \andalso \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso \phantom{ T_1 = T_2 }
-  }{\Gamma \vdash \ifte{b}{x}{y} \;\; \Rightarrow \;\; \phantom{ T_1 }}
-
-\end{frame}
-
-\begin{frame}
-
-  \infrule[T-if]{
-    \Gamma \vdash x \Rightarrow T_1 \andalso \Gamma \vdash y \Rightarrow T_2 \andalso B = \Bool \\
-    \Gamma \vdash b \Rightarrow B  \andalso \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso \redbox{$T_1 = T_2$}
-  }{\Gamma \vdash \ifte{b}{x}{y} \;\; \Rightarrow \;\; \phantom{ T_1 }}
-
-\end{frame}
-
-\begin{frame}
-
-  \infrule[T-if]{
-    \Gamma \vdash x \Rightarrow T_1 \andalso \Gamma \vdash y \Rightarrow T_2 \andalso B = \Bool \\
-    \Gamma \vdash b \Rightarrow B  \andalso \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso T_1 = T_2
-  }{\Gamma \vdash \ifte{b}{x}{y} \;\; \Rightarrow \;\; \greenbox{$T_1$} }
-
-\end{frame}
+\section{Unification}
 
 \end{document}
