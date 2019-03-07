@@ -1,8 +1,8 @@
 \documentclass[aspectratio=169]{beamer}
 \usepackage{bcprules, textcomp, prftree, amsmath, tikz}
-\usepackage[safe]{tipa}
 
-\setbeamercolor{background canvas}{bg=black!3}
+\newcommand{\bgcolor}{black!3}
+\setbeamercolor{background canvas}{bg=\bgcolor}
 
 \newcommand{\ifte}[3]{\texttt{if} \; {#1} \; \texttt{then} \; {#2} \; \texttt{else} \; {#3}}
 \newcommand{\lamann}[3]{\lambda {#1} \texttt{:} {#2} \texttt{.} \; {#3}}
@@ -10,13 +10,15 @@
 \newcommand{\true}[0]{\texttt{true}}
 \newcommand{\false}[0]{\texttt{false}}
 \newcommand{\Bool}[0]{\texttt{Bool}}
+\newcommand{\whitebox}[1]{\tikz[baseline] \node[fill=\bgcolor,rectangle,anchor=text]{#1}; }
 \newcommand{\bluebox}[1]{\tikz[baseline] \node[fill=blue!20,rectangle,anchor=text]{#1}; }
 \newcommand{\greenbox}[1]{\tikz[baseline] \node[fill=green!20,rectangle,anchor=text]{#1}; }
 \newcommand{\redbox}[1]{\tikz[baseline] \node[fill=red!20,rectangle,anchor=text]{#1}; }
 \newcommand{\blueoutline}[1]{\tikz \node[draw=beamer@blendedblue, rectangle]{#1}; }
-\newcommand{\blueboxon}[2]{ \temporal<#1>{#2}{\bluebox{$#2$}}{#2} }
-\newcommand{\greenboxon}[2]{ \temporal<#1>{#2}{\greenbox{$#2$}}{#2} }
-\newcommand{\redboxon}[2]{ \temporal<#1>{#2}{\redbox{$#2$}}{#2} }
+\newcommand{\boxon}[3]{ \temporal<#2>{\whitebox{$#3$}}{#1{$#3$}}{\whitebox{$#3$}} }
+\newcommand{\blueboxon}[2]{ \boxon{\bluebox}{#1}{#2} }
+\newcommand{\greenboxon}[2]{ \boxon{\greenbox}{#1}{#2} }
+\newcommand{\redboxon}[2]{ \boxon{\redbox}{#1}{#2} }
 
 \addtobeamertemplate{frametitle}{\let\insertframetitle\insertsectionhead}{}
 
@@ -149,44 +151,14 @@
   % let's design a typing rule for it
 
   \infrule[T-lam]{
-    \onslide<3->{\blueboxon{3-5}{\Gamma ,\; x : \; \onslide<4->{??}} \vdash \blueboxon{3-5}{\onslide<5->{e :}}} \onslide<6->{\greenboxon{6}{T}}
+    \onslide<3->{\blueboxon{3,4}{\Gamma ,\; x : \; \onslide<4->{??}} \vdash \blueboxon{3,4}{e} :} \onslide<5->{\greenboxon{5}{T}}
   }{
-    \onslide<2->{\blueboxon{2}{\Gamma} \vdash \blueboxon{2}{\lam{x}{e}} \;\; :} \;\; \onslide<7->{\greenboxon{7}{?? \rightarrow T}}
+    \onslide<2->{\blueboxon{2}{\Gamma} \vdash \blueboxon{2}{\lam{x}{e}} \;\; :} \;\; \onslide<6->{\greenboxon{6}{?? \rightarrow T}}
   }
 
 \end{frame}
 
-\begin{frame}
-  \frametitle
-
-  % Solving these kinds of problems is the essence of *type inference*
-  % There is an unknown type, and we need
-
-  \infrule[T-lam]
-    {\Gamma , \; x : \; ?? \vdash e : T}
-    {\Gamma \vdash \lam{x}{e} \;\; : \;\;\; ?? \rightarrow T}
-
-\end{frame}
-
 \section{Type Inference}
-
-\begin{frame}
-  \frametitle
-
-  % definition
-  %
-  % we're going to augment the typing rules so that other parts of the expression
-  % can give us hints about the type of the argument
-
-  \textbf{infer} /\textipa{In"f@:}/ % /ɪnˈfəː/
-
-  \textit{verb}
-
-  \bigskip
-
-  Deduce or conclude (something) from evidence and reasoning rather than from explicit statements.
-
-\end{frame}
 
 \begin{frame}
   \frametitle
@@ -275,8 +247,8 @@
   % a function from 'something' to the body type
 
   \infrule[T-lam]
-    {new(?^n) \andalso \Gamma , \; x : \; ?^n \vdash e \Rightarrow T}
-    {\Gamma \vdash \lam{x}{e} \;\; \Rightarrow \;\; ?^n \rightarrow T}
+    {\redboxon{3}{new(?^n)} \andalso \blueboxon{4}{\Gamma , \; x : \; ?^n} \vdash \blueboxon{4}{e} \Rightarrow \greenboxon{5}{T}}
+    {\blueboxon{2}{\Gamma} \vdash \blueboxon{2}{\lam{x}{e}} \;\; \Rightarrow \;\; \greenboxon{6}{?^n \rightarrow T}}
 
 \end{frame}
 
@@ -301,7 +273,7 @@
     \onslide<5->{\blueboxon{5}{\Gamma} \vdash \blueboxon{5}{x} \Rightarrow} \onslide<6->{\greenboxon{6}{T}} \andalso
     \onslide<7->{\redboxon{7}{new(?^n)}} \andalso \\
     \onslide<3->{\blueboxon{3}{\Gamma} \vdash \blueboxon{3}{f} \Rightarrow} \onslide<4->{\greenboxon{4}{S}} \andalso
-    \onslide<8->{\redboxon{8}{S = T \rightarrow \; ?^n}}
+    \onslide<8->{\redboxon{8}{[S = T \rightarrow \; ?^n]}}
   }{
     \onslide<2->{\blueboxon{2}{\Gamma} \vdash \blueboxon{2}{f \; x} \;\; \Rightarrow} \;\;
     \onslide<9->{\greenboxon{9}{?^n}}
@@ -315,21 +287,14 @@
   \infrule[T-if]{
     \onslide<5->{\blueboxon{5}{\Gamma} \vdash \blueboxon{5}{x} \Rightarrow} \onslide<6->{\greenboxon{6}{T_1}} \andalso
     \onslide<7->{\blueboxon{7}{\Gamma} \vdash \blueboxon{7}{y} \Rightarrow} \onslide<8->{\greenboxon{8}{T_2}} \andalso
-    \onslide<9->{\redboxon{9}{B = \Bool}} \\
+    \onslide<9->{\redboxon{9}{[B = \Bool]}} \\
     \onslide<3->{\blueboxon{3}{\Gamma} \vdash \blueboxon{3}{b} \Rightarrow} \onslide<4->{\greenboxon{4}{B}} \andalso
     \phantom{ \Gamma \vdash y \Rightarrow T_2 } \andalso
-    \onslide<10->{\redboxon{10}{T_1 = T_2}}
+    \onslide<10->{\redboxon{10}{[T_1 = T_2]}}
   }{
     \onslide<2->{\blueboxon{2}{\Gamma} \vdash \blueboxon{2}{\ifte{b}{x}{y}} \;\; \Rightarrow} \;\;
     \onslide<11->{\greenboxon{11}{T_1}}
   }
-
-\end{frame}
-
-\begin{frame}
-  \frametitle
-
-  \[ \lam{b}{\ifte{b}{\false}{\true}} \]
 
 \end{frame}
 
@@ -344,6 +309,7 @@
 \newcommand{\constraintslides}[0]{54}
 
 \begin{frame}[t]
+  % proof tree example
   \frametitle
 
   \newcommand{\iftebfalsetrue}{\ifte{b}{\false}{\true}}
@@ -390,11 +356,11 @@
           }
         }
         { \highlighton{\ifslides,\constraintslides}{
-          \prftree[r, noline]{}{?^0 = \Bool}
+          \prftree[r, noline]{}{[?^0 = \Bool]}
           }
         }
         { \highlighton{\ifslides,\constraintslides}{
-          \prftree[r, noline]{}{\Bool = \Bool}
+          \prftree[r, noline]{}{[\Bool = \Bool]}
           }
         }
         { 
@@ -411,6 +377,8 @@
   }
   }
   \]
+
+  \only<1>{\[ \lam{b}{\ifte{b}{\false}{\true}} \]}
 
   \newcommand{\xtobA}{ \blueboxon{3,4}{ \changeto{4}{x}{b} } }
   \newcommand{\etoif}{ \blueboxon{6,7}{ \changeto{7}{e}{\iftebfalsetrue} } }
@@ -447,16 +415,16 @@
   \infrule[T-if]{
     \gammatogammabA \vdash \xtofalse \Rightarrow \TOnetoBoolGreen \andalso
     \gammatogammabA \vdash \ytotrue \Rightarrow \TTwotoBoolGreen \andalso
-    \BtozeroRed = \Bool \\
+    [\BtozeroRed = \Bool] \\
     \gammatogammabA \vdash \btob \Rightarrow \BtozeroGreen \andalso
     \phantom{ \gammatogammabA \vdash \ytotrue \Rightarrow \TTwotoBoolGreen } \andalso
-    \TOnetoBoolRed = \TTwotoBoolRed
+    [\TOnetoBoolRed = \TTwotoBoolRed]
   }{\gammatogammabA \vdash \ifte{\btob}{\xtofalse}{\ytotrue} \;\; \Rightarrow \;\; \TOnetoBoolGreen }
   }
 
   \newcommand{\xtobB}{ \blueboxon{28,29}{ \changeto{29}{x}{b} } }
   \newcommand{\ttozero}{ \changeto{32}{T}{?^0} }
-  \newcommand{\ttozeroBlue}{ \blueboxon{31,32}{\ttozero} }
+  \newcommand{\ttozeroBlue}{ \blueboxon{25,26,31,32}{\ttozero} }
   \newcommand{\ttozeroGreen}{ \greenboxon{31,32}{\ttozero} }
   \newcommand{\gammatogammabB}{ \blueboxon{25,26}{ \changeto{26}{\Gamma}{\Gamma,\; b : \; \ttozeroBlue } } }
 
@@ -510,5 +478,346 @@
 \end{frame}
 
 \section{Unification}
+
+\begin{frame}
+  \frametitle
+
+  \begin{itemize}
+    \item Base types \\ \bigskip $\Bool, \; \texttt{Int}, \; \texttt{String}, \; \dots$ \bigskip
+    \item Compound types \\ \bigskip $\rightarrow, \; \texttt{List}, \; \texttt{Either}, \; \dots$ \bigskip
+    \item Metavariables \\ \bigskip $?^0, \; ?^1, \; ?^2, \; \dots$ \bigskip
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}
+  % Unification is about making things the same
+  %
+  % During type checking, we're generate these contraints, or equations
+  %
+  % Unification is the process of making them the same (into tautologies)
+  % or saying that there was an error in the case that some equation is impossible
+  \frametitle
+
+  \[
+  \begin{aligned}
+    ?^0 & = \Bool \\
+    \Bool & = \Bool \\
+    \Bool & = \Bool \rightarrow \; ?^1 \\
+    ?^2 \rightarrow \; ?^3 & = \; ?^2
+  \end{aligned}
+  \]
+
+\end{frame}
+
+\begin{frame}
+  % We do this by way of a substitution
+  %
+  % a substition is a function that maps metas to types
+  %
+  % it maps some distinguished metas to other types, and all the other
+  % metas are just mapped to themselves
+  %
+  % I don't care for including all the 'boring' metas, so when I write substitutions
+  % I'm only going to note the interesting mappings and leave all the boring ones implied
+  \frametitle
+
+  \begin{center}Substitutions\end{center}
+
+  \onslide<1->{
+  \[
+  \begin{cases}
+    ?^0 \mapsto & \Bool \\
+    ?^1 \mapsto & ?^2 \rightarrow \Bool \\
+    ?^2 \mapsto & ?^2 \\
+    \dots \\
+    ?^n \mapsto & ?^n \\
+  \end{cases}
+  \]
+  }
+
+  \onslide<+->{
+  \[
+  \begin{cases}
+    ?^0 \mapsto & \Bool \\
+    ?^1 \mapsto & ?^2 \rightarrow \Bool \\
+  \end{cases}
+  \]
+  }
+
+\end{frame}
+
+\begin{frame}
+  % Here's some examples of what it looks like to apply a substitution
+  %
+  % You run the substitution function
+  \frametitle
+
+  \begin{center}Applying substitutions\end{center}
+
+  \[
+  s =
+  \begin{cases}
+    ?^0 \mapsto & \Bool \\
+    ?^1 \mapsto & ?^2 \rightarrow \Bool
+  \end{cases}
+  \]
+
+  \bigskip
+
+  \[
+  \begin{aligned}
+  \onslide<2->{s(?^0) & \leadsto \Bool} \\
+  \onslide<3->{s(?^1) & \leadsto \; ?^2 \rightarrow \Bool} \\
+  \onslide<4->{s(?^2) & \leadsto \; ?^2}
+  \end{aligned}
+  \]
+
+\end{frame}
+
+\begin{frame}
+  % I'll also say that you can apply a substitution to a type,
+  %
+  % by applying the substitiution to every meta present in the type
+  \frametitle
+
+  \begin{center}Applying substitutions\end{center}
+
+  \[
+  s =
+  \begin{cases}
+    ?^0 \mapsto & \Bool \\
+    ?^1 \mapsto & ?^2 \rightarrow \Bool
+  \end{cases}
+  \]
+
+  \bigskip
+
+  \[
+  \begin{aligned}
+  \onslide<2->{s(\Bool) & \leadsto \Bool} \\
+  \onslide<3->{s(?^0 \rightarrow \; ?^0) & \leadsto \; \Bool \rightarrow \Bool} \\
+  \onslide<4->{s(?^1 \rightarrow \; ?^2) & \leadsto \; (?^2 \rightarrow \Bool) \rightarrow \; ?^2}
+  \end{aligned}
+  \]
+
+\end{frame}
+
+\begin{frame}
+  % substitutions have an identity and composition
+  \frametitle
+
+  \[
+  \begin{aligned}
+    id & = \begin{cases}\end{cases} \\
+    ~ \\
+    (s_2 \circ s_1)(x) & = s_2(s_1(x))
+  \end{aligned}
+  \]
+
+\end{frame}
+
+\begin{frame}
+  % We say a substitution 'solves' a system of equations if applying the subtitution
+  % to both sides makes the equation trivially true (both sides are syntactically equal)
+  \frametitle
+
+  \begin{center}
+    $s$ is a solution of $x = y$ when $s(x) = s(y)$ \\
+    \bigskip
+    $s$ unifies $x$ and $y$
+  \end{center}
+
+\end{frame}
+
+\begin{frame}
+  % so what's a solution to this equation?
+  %
+  % 0 -> Bool is one, but there are others
+  %
+  % there's a sense in which the first one is the 'best', it's a minimal solution
+  % without any cruft
+  \frametitle
+
+  \begin{center}What's the solution?\end{center}
+
+  \[ ?^0 \rightarrow \Bool = \Bool \rightarrow \Bool \]
+
+  \[
+  \begin{aligned}
+  \onslide<2->{
+  s & = 
+  \begin{cases}
+  ?^0 \mapsto & \Bool
+  \end{cases}
+  } \\
+  \onslide<3->{
+  s' & =
+  \begin{cases}
+  ?^0 \mapsto & \Bool \\
+  ?^1 \mapsto & \Bool
+  \end{cases}
+  } \\
+  \onslide<4->{
+  s'' & =
+  \begin{cases}
+  ?^0 \mapsto & \Bool \\
+  ?^1 \mapsto & \Bool \\
+  ?^2 \mapsto & ?^{24} \rightarrow \; ?^{25}
+  \end{cases}
+  } \\
+  \onslide<5->{\dots}
+  \end{aligned}
+  \]
+
+\end{frame}
+
+\begin{frame}
+  % the 'best' solution is known as the 'most general' solution 
+  \frametitle
+
+  \begin{center}
+    Most General (Solution/Unifier): \\
+    \bigskip
+    $s$ is the most general solution for an equation if all other
+    solutions $s'$ can be written in terms of $s$ composed with some other
+    substitution
+  \end{center}
+
+  \[ solves(s, e) \]
+  \[ \forall s'. \; \exists h. \; solves(s', e) \Rightarrow s' = s \circ h \] 
+\end{frame}
+
+\begin{frame}
+  % so all the solutions to the earlier equation can be written in terms of `s`
+  %
+  % this is the first desirable property of solutions that we calculate
+  \frametitle
+
+  \[
+  \begin{aligned}
+  s & = 
+  \begin{cases}
+  ?^0 \mapsto & \Bool
+  \end{cases}
+  & \onslide<2->{= & \; s \circ id} \\
+  s' & =
+  \begin{cases}
+  ?^0 \mapsto & \Bool \\
+  ?^1 \mapsto & \Bool
+  \end{cases}
+  & \onslide<3->{= & \; s \circ \begin{cases}?^1 \mapsto \Bool\end{cases}} \\
+  s'' & =
+  \begin{cases}
+  ?^0 \mapsto & \Bool \\
+  ?^1 \mapsto & \Bool \\
+  ?^2 \mapsto & ?^{24} \rightarrow \; ?^{25}
+  \end{cases}
+  & \onslide<4->{ = & \;
+    s \circ
+    \begin{cases}
+      ?^1 \mapsto & \Bool \\
+      ?^2 \mapsto & ?^{24} \rightarrow \; ?^{25}
+    \end{cases}
+  }
+  \end{aligned}
+  \]
+
+\end{frame}
+
+\begin{frame}
+  % the other desirable property is idempotence. this is mainly just for convenience,
+  % it's nicer if a solution does 'all its work in one go'.
+  \frametitle
+
+  \begin{center}Idempotence:\end{center}
+
+  \[ s \circ s = s \]
+
+\end{frame}
+
+\begin{frame}[t]
+  \frametitle
+
+  \[
+  \begin{aligned}
+    & unify & : & \; Set \; Equation \rightarrow Maybe \; Substitution \\
+    \onslide<2->{& unify(\{\}) & = & \; Just \; id \\}
+    \onslide<3->{& unify(\{ B_1 = B_2, rest \}) & = & \; \\}
+    \onslide<4->{& ~~ \texttt{if} \; B_1 = B_2 \; \texttt{then} \; unify(rest) \; \texttt{else} \; \bot \span \span \\}
+    \onslide<5->{& unify(\{ C_1(x_1, \; \dots, \; x_n) = C_2(y_1, \; \dots, \; y_m), rest \}) & = & \; \\}
+    \onslide<6->{& ~~ \texttt{if} \; C_1 = C_2 \; \texttt{then} \; unify(\{ \; x_i = y_i \; | \; i \in [1,\;n] \; \} \cup rest) \; \texttt{else} \; \bot \span \span \\}
+    \onslide<7->{& unify(\{ ?^n = t, rest \}) & = & \; \\}
+    \onslide<8->{& ~~ \texttt{let} \; s = \begin{cases}?^n \mapsto t \end{cases} \\}
+    \onslide<9->{
+      & ~~ \texttt{if} \; occurs(?^n, t) \; \texttt{then} \; \bot \; \texttt{else} \;
+      s \circ unify(\{ \; s(t) = s(u) \; | \; (t = u) \in rest \; \}) \span \span \\
+    }
+    \onslide<10->{& unify(\{ s = t, rest \}) & = & \; unify(\{ t = s, rest \})}
+  \end{aligned}
+  \]
+
+\end{frame}
+
+\begin{frame}
+  \frametitle
+
+  Why the 'occurs' check?
+
+\end{frame}
+
+\begin{frame}
+  \frametitle
+
+  \onslide<+->{\[ ?^n = \Bool \]}
+  \bigskip
+  \onslide<+->{\[ s = \begin{cases}?^n \mapsto \Bool\end{cases} \]}
+  \bigskip
+  \[
+  \bigskip
+  \begin{aligned}
+  \onslide<+->{& s(?^n) & = & \; s(\Bool) \\}
+  \onslide<+->{& \Bool & = & \; \Bool}
+  \end{aligned}
+  \]
+
+\end{frame}
+
+\begin{frame}
+  \frametitle
+
+  \onslide<+->{\[ ?^n = \; ?^n \rightarrow \Bool \]}
+  \bigskip
+  \onslide<+->{\[ s = \begin{cases}?^n \mapsto \; ?^n \rightarrow \Bool \end{cases} \]}
+  \bigskip
+  \[
+  \bigskip
+  \begin{aligned}
+  \onslide<+->{& s(?^n) & = & \; s(?^n \rightarrow \Bool) \\}
+  \onslide<+->{& ?^n \rightarrow \Bool & = & \; (?^n \rightarrow \Bool) \rightarrow \Bool}
+  \end{aligned}
+  \]
+
+\end{frame}
+
+\begin{frame}
+  \frametitle
+
+  \onslide<+->{Performance considerations: \\}
+
+  \begin{itemize}
+  \item<+-> Substitution is slow
+    \begin{itemize}
+      \item<+-> Mutable variables for metas
+      \item<+-> Union-Find data structure
+    \end{itemize}
+  \item<+-> Occurs check is slow
+    \begin{itemize}
+      \item<+-> Ignore it
+      \item<+-> Defer it
+    \end{itemize}
+  \end{itemize}
+
+\end{frame}
 
 \end{document}
