@@ -1,5 +1,5 @@
 \documentclass[aspectratio=169]{beamer}
-\usepackage{bcprules, textcomp, prftree, amsmath, tikz}
+\usepackage{bcprules, textcomp, prftree, amsmath, tikz, hyperref}
 
 \newcommand{\bgcolor}{black!3}
 \setbeamercolor{background canvas}{bg=\bgcolor}
@@ -41,6 +41,51 @@
 \beamertemplatenavigationsymbolsempty
 
 \frame{\titlepage}
+
+\section{Notation}
+
+\begin{frame}
+  \frametitle
+
+  \[
+  \begin{aligned}
+  thing ::= & \\
+  & stuff \\
+  & more \; stuff \\
+  & \dots
+  \end{aligned}
+  \]
+
+\end{frame}
+
+\begin{frame}
+  \frametitle
+
+  \infrule[rule-name]
+    {assumption_1 \andalso assumption_2 \andalso \dots \andalso assumption_n}
+    {conclusion}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle
+
+  \[
+  \begin{aligned}
+  Context ::= & \\
+  & \bullet \\
+  & Context , var : Type
+  \end{aligned}
+  \]
+
+\end{frame}
+
+\begin{frame}
+  \frametitle
+
+  \[ Context \vdash term : Type \]
+
+\end{frame}
 
 \section{STLC}
 
@@ -684,8 +729,11 @@
     substitution
   \end{center}
 
-  \[ solves(s, e) \]
-  \[ \forall s'. \; \exists h. \; solves(s', e) \Rightarrow s' = s \circ h \] 
+  \[
+  \prftree
+    {solves(s, e)}
+    {\forall s'. \; \exists h. \; solves(s', e) \Rightarrow s' = s \circ h}
+  \]
 \end{frame}
 
 \begin{frame}
@@ -741,8 +789,8 @@
 
   \[
   \begin{aligned}
-    & unify & : & \; Set \; Equation \rightarrow Maybe \; Substitution \\
-    \onslide<2->{& unify(\{\}) & = & \; Just \; id \\}
+    & unify & : & \; Set \; Equation \rightarrow Substitution \\
+    \onslide<2->{& unify(\{\}) & = & \; id \\}
     \onslide<3->{& unify(\{ B_1 = B_2, rest \}) & = & \; \\}
     \onslide<4->{& ~~ \texttt{if} \; B_1 = B_2 \; \texttt{then} \; unify(rest) \; \texttt{else} \; \bot \span \span \\}
     \onslide<5->{& unify(\{ C_1(x_1, \; \dots, \; x_n) = C_2(y_1, \; \dots, \; y_m), rest \}) & = & \; \\}
@@ -818,6 +866,237 @@
     \end{itemize}
   \end{itemize}
 
+\end{frame}
+
+\section{Polymorphism}
+
+% we're missing one last piece in our inference system
+
+\begin{frame}
+  \frametitle
+
+  \[ \lam{x}{\lam{y}{x}} \]
+
+\end{frame}
+
+\begin{frame}
+  % at the end of inference for this term we have unsolvable metas
+  \frametitle
+
+  \[
+  \prftree[r]{\rn{(T-lam)}}
+    { new(?^0) }
+    {
+      \prftree[r]{\rn{(T-lam)}}
+        { new(?^1) }
+        { \prftree[r]{\rn{(T-var)}}
+            {}
+            { \Gamma, x : \; ?^0, y : \; ?^1 \vdash x \Rightarrow \; ?^0 }
+        }
+        { \Gamma, x : \; ?^0 \vdash \lam{y}{x} \;\; \Rightarrow \;\; ?^1 \rightarrow \; ?^0 }
+    }
+    { \Gamma \vdash \lam{x}{\lam{y}{x}} \;\; \Rightarrow \;\; ?^0 \rightarrow \; ?^1 \rightarrow \; ?^0 }
+  \]
+
+\end{frame}
+
+\begin{frame}
+  \frametitle
+
+  \[
+  \begin{aligned}
+  tyvar ::= & \\
+  & \alpha \\
+  & \beta \\
+  & \dots \\ \\
+  Type ::= & \\
+  & \dots \\
+  & tyvar
+  \end{aligned}
+  \]
+
+\end{frame}
+
+\begin{frame}
+  \frametitle
+
+  \[
+  \begin{aligned}
+  Scheme ::= & \\
+  & Type \\
+  & \forall tyvar . \; Scheme \\ \\
+  Context ::= & \\
+  & \bullet \\
+  & Context , \; var : Scheme
+  \end{aligned}
+  \]
+
+\end{frame}
+
+\begin{frame}
+  \frametitle
+
+  \[ \forall \alpha\texttt{.} \; \alpha \rightarrow \alpha \]
+  \[ \forall \alpha\texttt{.} \; \forall \beta\texttt{.} \; \alpha \rightarrow \beta \rightarrow \alpha \]
+
+\end{frame}
+
+\begin{frame}
+  \frametitle
+
+  \[
+  \begin{aligned}
+  & freetvs_{\texttt{Type}} & : & \; Type \rightarrow Set \; tyvar \\
+  & freetvs_{\texttt{Type}} & = & \; \dots
+  \end{aligned}
+  \]
+
+  \bigskip
+
+  \[
+  \begin{aligned}
+  & freetvs_{\texttt{Scheme}} & : & \; Scheme \rightarrow Set \; tyvar \\
+  & freetvs_{\texttt{Scheme}}(\forall \alpha \texttt{.} T) & = & \; freetvs_{\texttt{Scheme}}(T) - \{\alpha\} \\
+  & freetvs_{\texttt{Scheme}}(T) & = & \; freetvs_{\texttt{Type}}(T)
+  \end{aligned}
+  \]
+
+  \bigskip
+
+  \[
+  \begin{aligned}
+  & freetvs_{\texttt{Context}}(\bullet) & = & \; \{\} \\
+  & freetvs_{\texttt{Context}}(\Gamma , x : T) & = & \; freetvs_{\texttt{Scheme}}(T) \cup freetvs_{\texttt{Context}}(\Gamma)
+  \end{aligned}
+  \]
+\end{frame}
+
+\begin{frame}
+
+  \[
+  \begin{aligned}
+  & instantiate & : & \; Scheme \rightarrow Type \\
+  & instantiate(\forall \alpha \texttt{.} T) & = & \; new(?^n); \; instantiate(T)[\alpha := \; ?^n] \\
+  & instantiate(T) & = & \; T
+  \end{aligned}
+  \]
+
+\end{frame}
+
+\begin{frame}
+  \frametitle
+
+  \[
+  \begin{aligned}
+  & solve : Type \rightarrow type \span \span \\
+  & solve = \dots \span \span \\ \\
+  & generalize & : & \; Context \rightarrow Type \rightarrow Scheme \\
+  & generalize(\Gamma, T) & = & \\
+  & ~~ \texttt{let} \; T' = solve(T) \span \span \\
+  & ~~ \forall (freetvs_{\texttt{Type}}(T') - freetvs_{\texttt{Context}}(\Gamma)) \texttt{.} T' \span \span
+  \end{aligned}
+  \]
+
+\end{frame}
+
+\begin{frame}
+  \frametitle
+
+  \infrule[T-var]
+    {}
+    {\Gamma , \; x : T \vdash x \Rightarrow instantiate(T)}
+
+\end{frame}
+
+\newcommand{\letin}[3]{\texttt{let } #1 = #2 \texttt{ in } #3}
+
+\begin{frame}
+  \frametitle
+
+  \[
+  \begin{aligned}
+  term ::= & \\
+  & \dots \\
+  & \letin{var}{term}{term}
+  \end{aligned}
+  \]
+
+\end{frame}
+
+\begin{frame}
+  % 'let generalization' is a little controversial. simon pj et al thing that 'lets'
+  % shouldn't have generalization, and only top level types should be generalized
+  \frametitle
+
+  \infrule[T-let]
+    {\Gamma \vdash e \Rightarrow S  \andalso   \Gamma, x : generalize(\Gamma, S) \vdash b \Rightarrow T}
+    {\Gamma \vdash \letin{x}{e}{b} \;\; \Rightarrow \;\; T}
+
+\end{frame}
+
+\newcommand{\letrecin}[3]{\texttt{letrec } #1 = #2 \texttt{ in } #3}
+
+\begin{frame}
+  \frametitle
+
+  \[
+  \begin{aligned}
+  term ::= & \\
+  & \dots \\
+  & \letrecin{var}{term}{term}
+  \end{aligned}
+  \]
+
+\end{frame}
+
+\begin{frame}
+  % 'let generalization' is a little controversial. simon pj et al thing that 'lets'
+  % shouldn't have generalization, and only top level types should be generalized
+  \frametitle
+
+  \infrule[T-letrec]
+    {
+      new(?^n)   \andalso
+      \Gamma, x : \; ?^n \vdash e \Rightarrow S   \andalso
+      ?^n = S   \andalso
+      \Gamma, x : generalize(\Gamma, S) \vdash b \Rightarrow T
+    }
+    {\Gamma \vdash \letrecin{x}{e}{b} \;\; \Rightarrow \;\; T}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle
+  \onslide<+->{Performance improvements: \\}
+
+  \begin{itemize}
+  \item<+-> 'Batched' instantiation/generalization
+  \item<+-> Generalization is slow
+    \begin{itemize}
+      \item<+-> Lambda / Let ranking
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\section{Further reading}
+
+\begin{frame}
+  \frametitle
+
+  \begin{itemize}
+  \item<2->
+    Martelli, A., \& Montanari, U. (1982). An efficient unification algorithm. \textit{ACM Transactions on Programming Languages and Systems (TOPLAS)}, 4(2), 258-282.
+  \item<3->
+    Paterson, M. S., \& Wegman, M. N. (1978). Linear unification. \text{Journal of Computer and System Sciences}, 16(2), 158-167.
+  \item<4->
+    Milner, R. (1978). A theory of type polymorphism in programming. \textit{Journal of computer and system sciences}, 17(3), 348-375.
+  \item<5->
+    Damas, L., \& Milner, R. (1982, January). Principal Type-Schemes for Functional Programs. In \textit{POPL} (Vol. 82, pp. 207-212).
+  \item<6->
+    \url{http://dev.stephendiehl.com/fun/006_hindley_milner.html}
+  \item<7->
+    Kuan, G., \& MacQueen, D. (2007, October). Efficient type inference using ranked type variables. In \textit{Proceedings of the 2007 workshop on Workshop on ML} (pp. 3-14). ACM.
+  \end{itemize}
 \end{frame}
 
 \end{document}
