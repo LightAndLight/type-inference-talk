@@ -567,7 +567,7 @@
   % I'm only going to note the interesting mappings and leave all the boring ones implied
   \frametitle
 
-  \begin{center}Substitutions\end{center}
+  \begin{center}Substitutions (Solutions/Unifiers)\end{center}
 
   \onslide<1->{
   \[
@@ -668,7 +668,7 @@
   \frametitle
 
   \begin{center}
-    $s$ is a solution of $x = y$ when $s(x) = s(y)$ \\
+    $s$ is a solution (unifier) of $x = y$ when $s(x) = s(y)$ \\
     \bigskip
     $s$ unifies $x$ and $y$
   \end{center}
@@ -988,7 +988,7 @@
 
   \[
   \begin{aligned}
-  & solve : Type \rightarrow type \span \span \\
+  & solve : Type \rightarrow Type \span \span \\
   & solve = \dots \span \span \\ \\
   & generalize & : & \; Context \rightarrow Type \rightarrow Scheme \\
   & generalize(\Gamma, T) & = & \\
@@ -1067,13 +1067,17 @@
 
 \begin{frame}
   \frametitle
-  \onslide<+->{Performance improvements: \\}
+
+   Performance improvements:
 
   \begin{itemize}
-  \item<+-> 'Batched' instantiation/generalization
-  \item<+-> Generalization is slow
+  \item<2-> 'Batched' instantiation/generalization
     \begin{itemize}
-      \item<+-> Lambda / Let ranking
+      \item<3-> $ \forall \tilde{\alpha} \texttt{.} T $
+    \end{itemize}
+  \item<4-> Generalization is slow
+    \begin{itemize}
+      \item<5-> Lambda / Let ranking
     \end{itemize}
   \end{itemize}
 \end{frame}
